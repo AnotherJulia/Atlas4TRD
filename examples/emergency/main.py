@@ -21,17 +21,21 @@ def emergency_room_sim():
     intake = Bubble("intake", simulation_config.intake_capacity)
     diagnosis = Bubble("diagnosis", simulation_config.diagnosis_capacity)
     medical_treatment = Bubble("medical_treatment", simulation_config.medication_capacity)
+    therapy_treatment = Bubble("therapy_treatment", simulation_config.therapy_capacity)
 
     env.add_bubble(waiting)
     env.add_bubble(intake)
     env.add_bubble(diagnosis)
     env.add_bubble(medical_treatment)
+    env.add_bubble(therapy_treatment)
 
     # lets create some patients (agents)
     # patient_1 = Agent(id=1, initial_depression_score=12, initial_bubble="intake")
     # patient_2 = Agent(id=2, initial_depression_score=8, initial_bubble="intake")
     # patient_3 = Agent(id=3, initial_depression_score=9, initial_bubble="diagnosis")
 
+
+    # Initialize the patients inside the system
     patient_factory = AgentFactory(50)
     patients = patient_factory.build()
     for patient in patients:
