@@ -1,9 +1,9 @@
-from examples.emergency.config import EmergencyRoomConfig
+from examples.depression.config import DepressionSimulationConfig
 from core import Environment, Agent, Bubble, MoveAgentEvent, AgentFactory
 
 # Set up the configuration/data file for the simulation
-simulation_config = EmergencyRoomConfig(
-    name="Emergency Room Simulation",
+simulation_config = DepressionSimulationConfig(
+    name="Depression Pathway Simulation",
     waiting_capacity=None,
     intake_capacity=10,
     diagnosis_capacity=5,
@@ -12,7 +12,7 @@ simulation_config = EmergencyRoomConfig(
 )
 
 
-def emergency_room_sim():
+def depression_sim():
     env = Environment(config=simulation_config)
     print("Running: ", env.name, " -------------")
 

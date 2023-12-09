@@ -2,13 +2,13 @@ from core.agent import Agent
 
 
 class Bubble:
-    # TODO : ADD CONNECTIONS TO AND FROM OTHER BUBBLES FOR VALIDATION OF MOVE EVENTS
 
     def __init__(self, name: str, capacity):
         self.name = name
         self.capacity = capacity
         self.current_agents = []
 
+        # TODO : ADD CONNECTIONS TO AND FROM OTHER BUBBLES FOR VALIDATION OF MOVE EVENTSl.,
         self.connections = []
 
     def __str__(self):

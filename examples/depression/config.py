@@ -1,7 +1,7 @@
 from core import SimulationConfig
 
 
-class EmergencyRoomConfig(SimulationConfig):
+class DepressionSimulationConfig(SimulationConfig):
 
     def __init__(self, name: str, waiting_capacity: int, intake_capacity: int, diagnosis_capacity: int, therapy_capacity: int, medication_capacity: int):
         super().__init__()

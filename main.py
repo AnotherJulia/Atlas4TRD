@@ -1,4 +1,4 @@
-import examples.emergency.main
+import examples.depression.main
 
 import matplotlib.pyplot as plt
 
@@ -15,5 +15,5 @@ def plot_bubble_occupancies(data):
 
 
 if __name__ == "__main__":
-    sim_data = examples.emergency.main.emergency_room_sim()
+    sim_data = examples.depression.main.depression_sim()
     plot_bubble_occupancies(sim_data)

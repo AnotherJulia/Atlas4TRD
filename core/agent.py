@@ -26,7 +26,7 @@ class Agent:
             self.depression_score += effect
 
     def move_to(self, new_bubble: str):
-        # TODO : Can we add some validator that this new_location / exists and is of type bubble
+        # TODO : Can we add some validator that this new_bubble / exists and is of type bubble
 
         # Store the current location for the future
         self.location_history.append(self.bubble)
@@ -34,34 +34,36 @@ class Agent:
         # Update the location to the new one
         self.bubble = new_bubble
 
+    # This is basically modeling the treatment plan of the patients ( maybe we can make a more solid
+    # system for this / or make it more organized / structured )
     def find_next_step(self, environment: 'Environment'):
         # How do we find the next step in the treatment? -> look at prev. bubbles and look at depression score
 
+        # When thrown into the waiting list, we want to go into the intake (with or without depression)
         if self.bubble == "waiting":
             return MoveAgentEvent(name="Moving Agent to Intake", time=environment.time + 2, agent_id=self.id,
                                   from_bubble="waiting", to_bubble="intake")
 
+        # When in the intake and we can finally go to diagnosis, we can move to get a depression score
         if self.bubble == "intake":
-            return MoveAgentEvent(name="Moving Agent to Diagnosis", time=environment.time + 2, agent_id=self.id,
-                                  from_bubble="intake", to_bubble="diagnosis")
+            if self.depression_score > 5:
+                return MoveAgentEvent(name="Moving Agent to Diagnosis", time=environment.time + 2, agent_id=self.id,
+                                      from_bubble="intake", to_bubble="diagnosis")
+            else:
+                return EndAgentEvent(name="Moving Agent to not-depressed", time=environment.time + 1, agent_id=self.id)
 
+        # After diagnosis, we get a more detailed depression score, and we can send the patient to the correct
+        # for them; this could be a therapeutical or pharmacological treatment according to the current pathway system
         if self.bubble == "diagnosis":
-
             if self.depression_score >= 10:
-                return MoveAgentEvent(name="Moving Agent to Pharmacological Treatment", time=environment.time + 1 + 10, agent_id=self.id,
+                return MoveAgentEvent(name="Moving Agent to Pharmacological Treatment", time=environment.time + 1 + 10,
+                                      agent_id=self.id,
                                       from_bubble="diagnosis", to_bubble="medical_treatment")
             elif 5 < self.depression_score < 10:
                 return MoveAgentEvent(name="Moving Agent to Therapy Treatment", time=environment.time + 1 + 10,
                                       agent_id=self.id, from_bubble="diagnosis", to_bubble="therapy_treatment")
-
             else:
-                return EndAgentEvent(name="Moving Agent to treated", time=environment.time+1, agent_id=self.id)
-
-
+                return EndAgentEvent(name="Moving Agent to treated", time=environment.time + 1, agent_id=self.id)
 
         # default return value
         return EndAgentEvent(name="Ending Agent", time=environment.time + 1, agent_id=self.id)
-
-    # def update_treatment_plan(self, new_plan):
-    #     # TODO : Can we add a treatment plan validator and create a type out of them
-    #     self.treatment_plan = new_plan
