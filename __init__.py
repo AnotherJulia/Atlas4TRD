@@ -1,2 +1,2 @@
-from Model import *
-from Utilities import *
+from .core import *
+from .utilities import *
