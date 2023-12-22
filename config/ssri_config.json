@@ -1,0 +1,11 @@
+{
+  "duration": 14,
+  "cost": 200,
+  "response_rate": 0.507,
+  "remission_rate": 0.236,
+  "relapse_rate": 0.2,
+  "suicide_rate": 0,
+  "treatment_adherence": 0.98,
+  "mean_delta_madrs": -16.2,
+  "sd_delta_madrs": 0.843
+}

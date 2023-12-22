@@ -1,2 +1,1 @@
-from .netx import *
-from .config_loader import *
+from .netx import generate_networkx_graph
