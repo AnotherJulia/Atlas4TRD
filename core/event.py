@@ -1,6 +1,7 @@
 import heapq
 import uuid
 
+
 class Event:
     def __init__(self, time, name=None):
         self.id = uuid.uuid4()
@@ -13,6 +14,7 @@ class Event:
     def execute(self, environment):
         raise NotImplementedError("Subclasses should implement this!")
 
+
 class ArrivalEvent(Event):
     def __init__(self, time, agent, bubble):
         super().__init__(time)
@@ -22,6 +24,7 @@ class ArrivalEvent(Event):
     def execute(self, environment):
         environment.add_agent(self.agent, self.bubble)
 
+
 class DepartureEvent(Event):
     def __init__(self, time, agent):
         super().__init__(time)
@@ -29,6 +32,7 @@ class DepartureEvent(Event):
 
     def execute(self, environment):
         environment.remove_agent(self.agent)
+
 
 class MoveEvent(Event):
     def __init__(self, time, agent, from_bubble, to_bubble):

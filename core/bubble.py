@@ -3,17 +3,21 @@ import uuid
 
 class Bubble:
 
-    def __init__(self, name, capacity, type):
+    def __init__(self, name, capacity, type, duration, probabilities):
         self.id = uuid.uuid4()
         self.name = name
-        self.agents = []
-        self.sub_bubbles = []
+        self.type = type
         self.capacity = capacity
         self.occupancy = 0
+        self.duration = duration
+        self.probabilities = probabilities
 
-        self.type = type
-
+        self.agents = []
+        self.sub_bubbles = []
         self.next_connections = []
+
+    def __str__(self):
+        return f"Bubble: {self.id} - {self.name}"
 
     def add_agent(self, agent):
         self.agents.append(agent)

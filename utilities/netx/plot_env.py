@@ -11,17 +11,15 @@ def plot_bubbles_and_connections(bubbles, connections):
         if bubble.type == 'state':
             colors.append('lightcoral')
         elif bubble.type == 'step':
-            colors.append('skyblue')
+            colors.append('aquamarine')
         else:
             colors.append('grey')
-
-    print(colors)
 
     for connection in connections:
         G.add_edge(connection.from_bubble.name, connection.to_bubble.name)
 
     plt.figure(figsize=(8, 6))
-    pos = nx.spring_layout(G)
+    pos = nx.kamada_kawai_layout(G)
 
     nx.draw_networkx(G, pos, node_color=colors, with_labels=True, node_size=1200)
     plt.title('Bubbles and Connections')

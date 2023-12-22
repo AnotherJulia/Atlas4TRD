@@ -1,0 +1,150 @@
+{
+  "bubbles": {
+    "intake": {
+      "name": "intake",
+      "type": "step",
+      "cost": 100,
+      "capacity": 5,
+      "duration": 1,
+      "probabilities": {
+        "remission": 0,
+        "_relapse": 0,
+        "no-response": 1
+      }
+    },
+    "ssri": {
+      "name": "ssri",
+      "type": "step",
+      "cost": 500,
+      "capacity": 10,
+      "duration": 10,
+      "probabilities": {
+        "remission": 0.5,
+        "_relapse": 0.1,
+        "no-response": 0.5
+      }
+    },
+    "ssri_li": {
+      "name": "ssri_li",
+      "type": "step",
+      "capacity": 10,
+      "cost": 700,
+      "duration": 10,
+      "probabilities": {
+        "remission": 0.6,
+        "_relapse": 0.08,
+        "no-response": 0.4
+      }
+    },
+    "anti_psychotics": {
+      "name": "anti_psychotics",
+      "type": "step",
+      "capacity": 8,
+      "cost": 600,
+      "duration": 12,
+      "probabilities": {
+        "remission": 0.44,
+        "_relapse": 0.61,
+        "no-response": 0.26
+      }
+    },
+    "esketamine": {
+      "name": "esketamine",
+      "type": "step",
+      "cost": 9000,
+      "capacity": 5,
+      "duration": 52,
+      "probabilities": {
+        "remission": 0.472,
+        "_relapse": 0.61,
+        "no-response": 0.22
+      }
+    },
+    "ect": {
+      "name": "ect",
+      "type": "step",
+      "cost": 1000,
+      "capacity": 3,
+      "duration": 12,
+      "probabilities": {
+        "remission": 0.59,
+        "_relapse": 0.5,
+        "no-response": 0.26
+      }
+    },
+
+    "remission": {
+      "name": "remission",
+      "type": "state",
+      "cost": 0,
+      "capacity": 0,
+      "duration": 0,
+      "probabilities": {
+        "remission": 0,
+        "_relapse": 0,
+        "no-response": 0
+      }
+    },
+    "relapse": {
+      "name": "relapse",
+      "type": "state",
+      "cost": 0,
+      "capacity": 0,
+      "duration": 0,
+      "probabilities": {
+        "remission": 0,
+        "_relapse": 0,
+        "no-response": 0
+      }
+    },
+    "death": {
+      "name": "death",
+      "type": "state",
+      "cost": 0,
+      "capacity": 0,
+      "duration": 0,
+      "probabilities": {
+        "remission": 0,
+        "_relapse": 0,
+        "no-response": 0
+      }
+    }
+  },
+  "connections": {
+    "intake_ssri": {
+      "name": "intake_ssri",
+      "start_bubble": "intake",
+      "end_bubble": "ssri"
+    },
+    "intake_ssri_li": {
+      "name": "intake_ssri_li",
+      "start_bubble": "intake",
+      "end_bubble": "ssri_li"
+    },
+    "intake_anti_psychotics": {
+      "name": "intake_anti_psychotics",
+      "start_bubble": "intake",
+      "end_bubble": "anti_psychotics"
+    },
+    "ssri_esketamine": {
+      "name": "ssri_esketamine",
+      "start_bubble": "ssri",
+      "end_bubble": "esketamine"
+    },
+    "ssri_li_esketamine": {
+      "name": "ssri_li_esketamine",
+      "start_bubble": "ssri_li",
+      "end_bubble": "esketamine"
+    },
+    "anti_psychotics_esketamine": {
+      "name": "anti_psychotics_esketamine",
+      "start_bubble": "anti_psychotics",
+      "end_bubble": "esketamine"
+    },
+    "esketamine_ect": {
+      "name": "esketamine_ect",
+      "start_bubble": "esketamine",
+      "end_bubble": "ect"
+    }
+  }
+}
