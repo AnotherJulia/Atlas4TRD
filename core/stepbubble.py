@@ -36,14 +36,16 @@ class StepBubble(Bubble):
 
     def add_agent(self, agent):
         from core import TreatmentEvent
-        super().add_agent(agent)  # call the base class method to add the agent
 
-        # Schedule a TreatmentEvent if capacity allows
-        if len(self.current_agents) <= self.capacity:
+        # Check if the bubble's capacity allows adding the agent
+        if len(self.current_agents) < self.capacity:
+            # Add the agent to the bubble
+            super().add_agent(agent)
+
+            # Schedule a TreatmentEvent
             event_time = self.environment.time + self.duration
             treatment_event = TreatmentEvent(event_time, agent, self)
             self.environment.schedule_event(treatment_event)
-
         else:
             # Add the agent to the waiting queue if capacity is full
             self.waiting_queue.append(agent)

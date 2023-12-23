@@ -1,21 +1,22 @@
-# Hybrid ABM-SD Simulation for TRD Treatment Pathway
+# Project Atlas: Modeling MDD Treatment Pathways
 
-## **🔍 Project Overview:**
-This repository hosts a hybrid simulation model combining Agent-Based Modeling (ABM) and System Dynamics (SD) approaches, dedicated to analyzing the Treatment-Resistant Depression (TRD) treatment pathway. Our model aims to provide deep insights into the complexities and dynamics of TRD treatment, assisting in optimizing patient outcomes and healthcare strategies.
+---
 
-## **🚀 Key Features:**
-- **Hybrid Modeling Approach**: Integrates ABM for individual patient trajectories and SD for broader healthcare system dynamics.
-- **TRD Focused**: Specifically tailored to explore the nuances of TRD treatment pathways.
-- **Data-Driven Simulations**: Utilizes real-world data to ensure accurate and reliable modeling.
-- **Interactive Visualizations**: Offers a suite of visualization tools for an intuitive understanding of complex dynamics.
+## Description
+This project is a simulation of a healthcare system where patients move through different stages of treatment. The simulation models patients as agents who navigate through various treatment points (bubbles) and undergo events that affect their health status
 
-## **🎯 Objectives:**
-- To enhance understanding of TRD treatment dynamics at both individual and system levels.
-- To identify key leverage points for improving TRD patient care and management.
-- To support decision-making in healthcare policy and clinical practices for TRD.
+## Features
 
-## **📚 Resources and Documentation:**
-We're working on detailed documentation for our software. We're also considering packaging our work so that other researchers can use it in their future projects
+* Agent-Based Modelling: Patients are simulated as individual agents with unique characteristics
+* Discrete-Event Simulation: Key events in the healthcare pathway are simulated at specific times
+* Treatment Pathway: Patients moe through different stages of treatment, represented by bubbles
+* Data Collection: The simulation collects data on patient flow, bubble occupancy and waiting times.
 
-## **✉️ Contact and Support:**
-For questions, suggestions, or support, please contact j.s.bertsch@student.tudelft.nl.
+## Structure
+
+* `agent.py` defines the Agent class, representing the patients
+* `bubble.py` contains the Bubble class, representing the treatment stages
+* `event.py` defines the Event class
+* `environment.py` defines the Core of the simulation environment, which manages the different Agents, Events and Bubbles
+
+Under examples, you can find the simulation method in action. 
