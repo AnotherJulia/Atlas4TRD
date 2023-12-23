@@ -1,99 +1,193 @@
-from core.config import SimulationConfig
-from core.agent import Agent
-from core.bubble import Bubble
-from core.event import Event
-
-from typing import List, Dict
-
+import heapq
+import uuid
 
 class Environment:
+    def __init__(self, time, dt):
+        self.patient_rate = None
+        self.id = uuid.uuid4()
+        self.time = time
+        self.dt = dt
 
-    def __init__(self, config: SimulationConfig):
-        self.name = config.name
-
-        self.time = 0
-        self.dt = config.dt
-        self.running = False
-
-        self.agents: List[Agent] = []
-        self.events_queue: List[Event] = []
-        self.bubbles: Dict[str, Bubble] = {}
-        # self.resources: Dict[Resources] = {}
+        self.bubbles = []
+        self.agents = []
+        self.connections = []
+        self.event_queue = []
+        self.factory = None
 
         self.data = {
             "time": [],
             "bubble_occupancies": {},
-            "waiting_list": []
-            # Add other data points as needed
+            "waiting_list": {}
         }
 
     def run(self, until, verbose=False):
-        self.running = True
 
-        while self.running and self.time < until:
-            if verbose: self.print_sim_progress()
+        while self.time < until:
+            # Let's update all the bubbles
+            for bubble in self.bubbles:
+                bubble.update()
 
+            # Adding new agents to the intake
+            self.factory_tick()
             self.process_events_up_to(self.time)
 
             self.collect_data()
             self.time += self.dt
 
-        self.running = False
+            if verbose: self.print_progress()
 
-    def print_sim_progress(self):
-        print(f"t={self.time} -------")
 
-        print("-- Agents -- ")
-        for agent in self.agents:
-            print(agent)
-
-        print("-- Bubbles -- ")
-        for name, bubble in self.bubbles.items():
+    def print_progress(self):
+        print(f"----- Time: {self.time} -----")
+        print(f"----- Bubble occupancies:")
+        for bubble in self.bubbles:
             print(bubble)
 
-        print("-- Events -- ")
-        for event in self.events_queue:
-            if not event.disabled: print(event)
+        print(f"----- Events:")
+        for event in self.event_queue:
+            print(event[1])
 
-    def process_events_up_to(self, time_limit):
-        while self.events_queue and self.events_queue[0].time <= time_limit:
-            next_event: Event = self.events_queue.pop(0)
-            # print("Executing Event: ", next_event.name)
-            next_event.execute(environment=self)
+    def add_bubble(self, bubble):
+        self.bubbles.append(bubble)
 
-    def schedule_event(self, event: Event):
-        self.add_event(event)
+    def create_step(self, slug, description, capacity, config, depth, env):
+        from core import StepBubble
 
-    def add_event(self, event: Event):
-        self.events_queue.append(event)
-        self.events_queue.sort(key=lambda x: x.time)
+        bubble = StepBubble(slug, description, capacity, config, depth, env)
+        self.bubbles.append(bubble)
 
-    def add_agent(self, agent: Agent):
-        self.agents.append(agent)
-        self.add_event(agent.find_next_step(environment=self))
+    def create_state(self, slug, description, depth, env):
+        from core import StateBubble
 
-        if agent.bubble in self.bubbles:
-            self.bubbles[agent.bubble].admit_agent(agent)
-        else:
-            print(f"Error: Bubble '{agent.bubble}' not found")
+        bubble = StateBubble(slug, description, depth, env)
+        self.bubbles.append(bubble)
 
-    def remove_agent(self, agent: Agent):
-        if agent in self.agents:
-            self.agents.remove(agent)
-        else:
-            print(f"Unable to find agent with id '{agent.id}' in the environment")
+    def add_connection(self, connection):
+        self.connections.append(connection)
 
-    def add_bubble(self, bubble: Bubble):
-        self.bubbles[bubble.name] = bubble
-        self.data["bubble_occupancies"][bubble.name] = []
+    def create_connection(self, start_slug, end_slug):
+        from core import Connection
+        global start_bubble
+        global end_bubble
 
-    # DATA ANALYSIS AND VISUALISATION
+        for bubble in self.bubbles:
+            if bubble.slug == start_slug:
+                start_bubble = bubble
+            elif bubble.slug == end_slug:
+                end_bubble = bubble
+
+        if start_bubble is None:
+            print(f"Could not find a start bubble with the slug: {start_slug}")
+            return
+        if end_bubble is None:
+            print(f"Could not find an end bubble with the slug: {end_slug}")
+            return
+
+        connection = Connection(start_bubble, end_bubble)
+        self.connections.append(connection)
+
+    def schedule_event(self, event):
+        heapq.heappush(self.event_queue, (event.time, event))
+
+    def process_events_up_to(self, end_time):
+        from core import Event
+        while self.event_queue and self.event_queue[0][0] <= end_time:
+            _, next_event = heapq.heappop(self.event_queue)
+            next_event.process(environment=self)
+
     def collect_data(self):
         self.data['time'].append(self.time)
 
-        for name, bubble in self.bubbles.items():
+        for bubble in self.bubbles:
             occupancy = bubble.get_occupancy()
-            self.data['bubble_occupancies'][name].append(occupancy)
+            waiting = bubble.get_waiting()
+            if bubble.slug not in self.data['bubble_occupancies']:
+                self.data['bubble_occupancies'][bubble.slug] = []
+                self.data['waiting_list'][bubble.slug] = []
 
-        # Collect other data as required
-        # TODO: ADD WAITING LIST
+            self.data['bubble_occupancies'][bubble.slug].append(occupancy)
+            self.data['waiting_list'][bubble.slug].append(waiting)
+
+
+    def connect_factory(self, factory):
+        factory.connect_environment(self)
+        self.factory = factory
+
+    def factory_tick(self):
+        if not self.factory:
+            raise ValueError("Factory not set up yet")
+
+        # Select the intake bubble
+        intake_bubble = next(bubble for bubble in self.bubbles if bubble.slug == "intake")
+        if intake_bubble is None:
+            return ValueError("No Intake Bubble Found")
+
+        for _ in range(self.patient_rate):
+            new_agent = self.factory.create_agent(intake_bubble)
+            intake_bubble.add_agent(new_agent)
+
+    def create_initial_agents(self, num_agents, initial_bubble_slug):
+        from core import TreatmentEvent, StateBubble
+
+        for _ in range(num_agents):
+            initial_bubble = next(bubble for bubble in self.bubbles if bubble.slug == initial_bubble_slug)
+
+            if initial_bubble is None:
+                raise ValueError(f"{initial_bubble_slug} not found in environment bubbles")
+
+            agent = self.factory.create_agent(initial_bubble)
+
+            self.agents.append(agent)  # Add the agents to the environment storage
+            initial_bubble.add_agent(agent)  # Add the agents to their initial bubble
+
+    def set_patient_rate(self, patient_rate):
+        # TODO: Make the Patient Rate varied per dt (week) / mean / sd
+        self.patient_rate = patient_rate
+
+    def plot_occupancies(self, bubbles_to_plot=None):
+        import matplotlib.pyplot as plt
+        # Check if there is data to plot
+        if not self.data['time'] or not self.data['bubble_occupancies']:
+            print("No data to plot.")
+            return
+
+        # If no specific bubbles are provided, plot all bubbles
+        if bubbles_to_plot is None:
+            bubbles_to_plot = self.data['bubble_occupancies'].keys()
+
+        plt.figure(figsize=(10, 6))  # Adjust the size as needed
+
+        for bubble_slug, occupancies in self.data['bubble_occupancies'].items():
+            if bubble_slug in bubbles_to_plot:
+                plt.plot(self.data['time'], occupancies, label=bubble_slug)
+
+        plt.xlabel('Time')
+        plt.ylabel('Occupancy')
+        plt.title('Bubble Occupancies Over Time')
+        plt.legend()
+        plt.grid(True)
+        plt.show()
+
+    def plot_waiting_queues(self, bubbles_to_plot=None):
+        import matplotlib.pyplot as plt
+        # Check if there is data to plot
+        if not self.data['time'] or not self.data['waiting_list']:
+            print("No data to plot.")
+            return
+
+        # If no specific bubbles are provided, plot all bubbles
+        if bubbles_to_plot is None:
+            bubbles_to_plot = self.data['waiting_list'].keys()
+
+        plt.figure(figsize=(10, 6))  # Adjust the size as needed
+
+        for bubble_slug, occupancies in self.data['waiting_list'].items():
+            if bubble_slug in bubbles_to_plot:
+                plt.plot(self.data['time'], occupancies, label=bubble_slug)
+
+        plt.xlabel('Time')
+        plt.ylabel('Waiting')
+        plt.title('Bubble Waiting List size Over Time')
+        plt.legend()
+        plt.grid(True)
+        plt.show()

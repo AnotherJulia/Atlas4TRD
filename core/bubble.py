@@ -1,37 +1,53 @@
-from core.agent import Agent
+import uuid
 
 
 class Bubble:
 
-    def __init__(self, name: str, capacity):
-        self.name = name
-        self.capacity = capacity
-        self.current_agents = []
+    def __init__(self, slug, description, depth, environment):
+        self.id = uuid.uuid4()
+        self.environment = environment
+        self.slug = slug
+        self.description = description
+        self.depth = depth
 
-        # TODO : ADD CONNECTIONS TO AND FROM OTHER BUBBLES FOR VALIDATION OF MOVE EVENTSl.,
+        self.current_agents = []
         self.connections = []
 
     def __str__(self):
-        return f"Bubble: {self.name} | Occupancy: {self.get_occupancy()} / {self.capacity}"
+        return f"Bubble: {self.slug} - {self.description}"
 
-    def admit_agent(self, agent: Agent):
-        # If there is room in the bubble, then add the patient and move them
-        if self.capacity is None: # No wait list to automatically allow moving in
-            self.current_agents.append(agent)
-            agent.move_to(self.name)
-            return True
-
-        if len(self.current_agents) < self.capacity:
-            self.current_agents.append(agent)
-            agent.move_to(self.name)
-            return True
-
-        # Otherwise return that the patient couldn't be admitted
-        return False
-
-    def release_agent(self, agent):
-        if agent in self.current_agents:
-            self.current_agents.remove(agent)
+    def update(self):
+        pass  # implement for own
 
     def get_occupancy(self):
         return len(self.current_agents)
+
+    def add_agent(self, agent):
+        print(f"Adding agent {agent.id} to {self.slug}")
+        self.current_agents.append(agent)
+
+    def remove_agent(self, agent):
+        if agent in self.current_agents:
+            print(f"Removing agent {agent.id} from {self.slug}")
+            self.current_agents.remove(agent)
+        else:
+            raise ValueError(f"Agent {agent.id} not found in bubble {self.slug}. Current bubble: {agent.current_bubble.slug}")
+
+    def connect(self, other_bubble):
+        # Connects bubble objects to others
+        self.connections.append(other_bubble)
+
+    def get_connected_bubbles(self, bubble_slug):
+        try:
+            bubble = next(bubble for bubble in self.connections if bubble.slug == bubble_slug)
+        except StopIteration:
+            bubble = None
+        return bubble
+
+    def get_waiting(self):
+        return 0    # waiting list implemented in child objects
+
+
+
+
+

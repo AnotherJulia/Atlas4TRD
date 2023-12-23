@@ -1,69 +1,84 @@
-from core_types.effects import EffectType
-from core.event import Event, MoveAgentEvent, EndAgentEvent
-
-from typing import TYPE_CHECKING
-
-if TYPE_CHECKING:
-    from core.environment import Environment
+import uuid
+import random
 
 
 class Agent:
-    def __init__(self, id: int, initial_depression_score, initial_bubble: str):
-        self.id = id
 
-        self.depression_score = initial_depression_score
-        self.bubble = initial_bubble
-        self.location_history = []
+    def __init__(self, current_bubble, episode_duration, symptom_severity, psychosis, functional_impairment,
+                 treatment_failures, environment):
+        self.environment = environment
+        self.id = uuid.uuid4()
+        self.current_bubble = current_bubble
+        self.history = []  # TODO : Add a TreatmentHistory object to simply store that here
+
+        # DM_TRD Parameters
+        self.episode_duration = episode_duration
+        self.symptom_severity = symptom_severity
+        self.psychosis = psychosis
+        self.functional_impairment = functional_impairment
+        self.treatment_failures = treatment_failures
 
     def __str__(self):
-        return f"Agent: {self.id} | Score: {self.depression_score} | Bubble: {self.bubble}"
+        return f'{self.id} @ {self.current_bubble} | Episode: {self.episode_duration} Symptom Severity: {self.symptom_severity} w/ Psychosis: {self.psychosis}'
 
-    def implement_effect(self, effect_type: EffectType, effect):
-        # Filter the different core_types of effects in this function
+    def move_agent(self, bubble):
+        self.current_bubble = bubble
+        bubble.add_agent(agent=self)
 
-        # If the effect has some kind of effect on the score
-        if effect_type == EffectType.SCORE:
-            self.depression_score += effect
+    def decide_and_schedule_next_event(self, event_time=None):
+        from core import MovementEvent
 
-    def move_to(self, new_bubble: str):
-        # TODO : Can we add some validator that this new_bubble / exists and is of type bubble
+        print(f"Agent {self.id} deciding next event from {self.current_bubble.slug}")
 
-        # Store the current location for the future
-        self.location_history.append(self.bubble)
+        if event_time is None: event_time = self.environment.time
+        next_event_slug, event_type = self.decide_next_event()
 
-        # Update the location to the new one
-        self.bubble = new_bubble
+        print(f"Agent {self.id} decided on event type: {event_type}")
 
-    # This is basically modeling the treatment plan of the patients ( maybe we can make a more solid
-    # system for this / or make it more organized / structured )
-    def find_next_step(self, environment: 'Environment'):
-        # How do we find the next step in the treatment? -> look at prev. bubbles and look at depression score
+        if event_type == "stay":
+            print(f"Agent {self.id} will stay in {self.current_bubble.slug}")
+            return
 
-        # When thrown into the waiting list, we want to go into the intake (with or without depression)
-        if self.bubble == "waiting":
-            return MoveAgentEvent(name="Moving Agent to Intake", time=environment.time + 2, agent_id=self.id,
-                                  from_bubble="waiting", to_bubble="intake")
+        # Debug: Print next bubble
+        print(f"Agent {self.id} is moving to bubble: {next_event_slug}")
 
-        # When in the intake and we can finally go to diagnosis, we can move to get a depression score
-        if self.bubble == "intake":
-            if self.depression_score > 5:
-                return MoveAgentEvent(name="Moving Agent to Diagnosis", time=environment.time + 2, agent_id=self.id,
-                                      from_bubble="intake", to_bubble="diagnosis")
-            else:
-                return EndAgentEvent(name="Moving Agent to not-depressed", time=environment.time + 1, agent_id=self.id)
+        # Find the next bubble based on the slug
+        next_bubble = self.current_bubble.get_connected_bubbles(next_event_slug)
+        if not next_bubble:
+            print(f"Error: No connected bubble found for slug: {next_event_slug}")
+            raise ValueError(f"No connected bubble found for slug: {next_event_slug}")
 
-        # After diagnosis, we get a more detailed depression score, and we can send the patient to the correct
-        # for them; this could be a therapeutical or pharmacological treatment according to the current pathway system
-        if self.bubble == "diagnosis":
-            if self.depression_score >= 10:
-                return MoveAgentEvent(name="Moving Agent to Pharmacological Treatment", time=environment.time + 1 + 10,
-                                      agent_id=self.id,
-                                      from_bubble="diagnosis", to_bubble="medical_treatment")
-            elif 5 < self.depression_score < 10:
-                return MoveAgentEvent(name="Moving Agent to Therapy Treatment", time=environment.time + 1 + 10,
-                                      agent_id=self.id, from_bubble="diagnosis", to_bubble="therapy_treatment")
-            else:
-                return EndAgentEvent(name="Moving Agent to treated", time=environment.time + 1, agent_id=self.id)
+        # Schedule a movement event to the next bubble
+        print(f"Scheduling movement event for Agent {self.id} to {next_event_slug} at time {event_time}")
+        movement_event = MovementEvent(event_time, self, self.current_bubble, next_bubble)
+        self.environment.schedule_event(movement_event)
 
-        # default return value
-        return EndAgentEvent(name="Ending Agent", time=environment.time + 1, agent_id=self.id)
+
+    def decide_next_event(self):
+        # Check the current bubble and decide the next step
+
+        print(f"Agent {self.id} is in bubble: {self.current_bubble.slug}")
+        global decision
+
+        if self.current_bubble.slug == "intake":
+            next_event_slug = random.choices(["ad", "ad_ap", "ap"], weights=[0.33, 0.33, 0.34])[0]
+            decision = (next_event_slug, 'movement')
+        elif self.current_bubble.slug == "ad" or self.current_bubble.slug == "ad_ap" or self.current_bubble.slug == "ap":
+            # After augmented therapies treatment, move to esketamine
+            decision = ('esketamine', 'movement')
+        elif self.current_bubble.slug == "esketamine":
+            # After esketamine, move to ect
+            decision = ('ect', 'movement')
+        elif self.current_bubble.slug == "ect":
+            # After ect, go back to intake for reassessment
+            decision = ('intake', 'movement')
+        elif self.current_bubble.slug == "remission":
+            # If in remission, stay there
+            decision = ('stay', 'stay')
+        elif self.current_bubble.slug == "relapse":
+            # If relapsed, go back to intake
+            decision = ('intake', 'movement')
+
+
+        print(f"Agent {self.id} decided on next event: {decision}")
+        return decision

@@ -1,0 +1,6 @@
+{
+  "episode_duration_dist": [0.59, 0.23, 0.18],
+  "symptom_severity_dist": [0.10, 0.50, 0.35, 0.05],
+  "functional_impairment_dist": [0.06, 0.93, 0.01],
+  "treatment_failures_dist": [0, 0.55, 0.07]
+}
