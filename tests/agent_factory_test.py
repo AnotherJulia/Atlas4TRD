@@ -16,6 +16,11 @@ class TestAgentFactory(unittest.TestCase):
         self.assertIn(agent.treatment_failures, ['0', '1-2', '3+'])
         print(agent)
 
+    def test_create_agents(self):
+        agents = self.factory.create_agents(10, "bubble1")
+        self.assertEqual(len(agents), 10)
+        for agent in agents: print(agent)
+
 
 if __name__ == '__main__':
     unittest.main()

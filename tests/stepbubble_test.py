@@ -5,7 +5,7 @@ from core import StepBubble
 
 class TestStepBubble(unittest.TestCase):
     def setUp(self):
-        self.step_bubble = StepBubble('test_slug', 'test_description', 2, '../config/ssri_config.json')
+        self.step_bubble = StepBubble('test_slug', 'test_description', 2, '../config/ad_config.json')
 
     def test_init(self):
         self.assertIsInstance(self.step_bubble.id, uuid.UUID)

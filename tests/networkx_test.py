@@ -1,6 +1,6 @@
 import unittest
 from utilities import generate_networkx_graph
-from core import Environment, Bubble, Connection  # Replace 'your_module' with your actual module name
+from core import Environment, Bubble, Connection, StepBubble  # Replace 'your_module' with your actual module name
 
 class TestGenerateNetworkxGraph(unittest.TestCase):
 
@@ -8,7 +8,7 @@ class TestGenerateNetworkxGraph(unittest.TestCase):
         # Set up an environment with some bubbles and connections
         environment = Environment()
 
-        bubble1 = Bubble('1', 'b1')
+        bubble1 = StepBubble('1', 'b1', capacity=2, treatment_config="../config/ad_config.json")
         environment.add_bubble(bubble1)
 
         bubble2 = Bubble('2', 'b2')
