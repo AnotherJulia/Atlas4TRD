@@ -1,4 +1,4 @@
-from core import Environment, Bubble, Agent, Factory
+from core import Environment, Factory
 from utilities import generate_networkx_graph
 
 if __name__ == '__main__':
@@ -45,7 +45,7 @@ if __name__ == '__main__':
                     depth=3, env=env)
     env.create_connection("esketamine", "ect")
     env.create_connection("ect", "remission")
-    env.create_connection("ect", "intake")
+    env.create_connection("ect", "ad")
 
     generate_networkx_graph(env)
 
@@ -53,14 +53,14 @@ if __name__ == '__main__':
     env.connect_factory(factory)
 
     # Set up the initial conditions of the pathway
-    env.create_initial_agents(5, "ad")
-    env.create_initial_agents(5, "ap")
-    env.create_initial_agents(5, "ad_ap")
-    env.create_initial_agents(4, "intake")
+    env.create_initial_agents(2, "ad")
+    env.create_initial_agents(2, "ap")
+    env.create_initial_agents(2, "ad_ap")
+    env.create_initial_agents(2, "intake")
     env.create_initial_agents(2, "esketamine")
     env.create_initial_agents(2, "ect")
 
-    env.set_patient_rate(2)         # this means 2 patients a week coming into the trd pathway
+    env.set_patient_rate(1)         # this means 2 patients a week coming into the trd pathway
 
     env.run(until=52, verbose=True)
 

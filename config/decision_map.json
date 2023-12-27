@@ -1,0 +1,16 @@
+{
+  "intake": {
+    "psychosis": "psychosis",
+    "default": "no_psychosis"
+  },
+  "psychosis": {
+    "mild": "ap-p",
+    "moderate": "ap-p",
+    "severe": "ad+ap-p"
+  },
+  "no_psychosis": {
+    "mild": "ad",
+    "moderate": "ad",
+    "severe": "ad+ap"
+  }
+}

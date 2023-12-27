@@ -1,23 +1,18 @@
-import json
 import random
+from utilities.config import read_config
 
 
 class Factory:
 
     def __init__(self, config):
         self.config_file = config
-        self.weights = self.build()
+        self.weights = read_config(config)
         self.environment = None
 
         self.episode_duration_dist = self.weights["episode_duration_dist"]
         self.symptom_severity_dist = self.weights["symptom_severity_dist"]
         self.functional_impairment_dist = self.weights["functional_impairment_dist"]
         self.treatment_failures_dist = self.weights["treatment_failures_dist"]
-
-    def build(self):
-        with open(self.config_file) as json_file:
-            config = json.load(json_file)
-            return config
 
     def create_agent(self, start_bubble):
         from core import Agent
