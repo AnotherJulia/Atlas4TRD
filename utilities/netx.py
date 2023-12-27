@@ -1,10 +1,10 @@
 import networkx as nx
 import matplotlib.pyplot as plt
 
-from core import StateBubble, StepBubble
-
 
 def generate_networkx_graph(environment):
+    from core import StateBubble, StepBubble
+
     G = nx.DiGraph()
 
     bubbles = environment.bubbles

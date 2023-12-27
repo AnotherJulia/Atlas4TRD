@@ -53,10 +53,10 @@ if __name__ == '__main__':
     env.connect_factory(factory)
 
     # Set up the initial conditions of the pathway
-    env.create_initial_agents(5, "ad")
-    env.create_initial_agents(5, "ap")
-    env.create_initial_agents(5, "ad_ap")
-    env.create_initial_agents(4, "intake")
+    env.create_initial_agents(2, "ad")
+    env.create_initial_agents(2, "ap")
+    env.create_initial_agents(2, "ad_ap")
+    env.create_initial_agents(2, "intake")
     env.create_initial_agents(2, "esketamine")
     env.create_initial_agents(2, "ect")
 
