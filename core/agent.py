@@ -71,7 +71,7 @@ class Agent:
             decision = ('ect', 'movement')
         elif self.current_bubble.slug == "ect":
             # After ect, go back to intake for reassessment
-            decision = ('intake', 'movement')
+            decision = ('ad', 'movement')
         elif self.current_bubble.slug == "remission":
             # If in remission, stay there
             decision = ('stay', 'stay')

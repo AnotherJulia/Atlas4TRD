@@ -1,4 +1,4 @@
-from core import Environment, Bubble, Agent, Factory
+from core import Environment, Factory
 from utilities import generate_networkx_graph
 
 if __name__ == '__main__':
@@ -45,7 +45,7 @@ if __name__ == '__main__':
                     depth=3, env=env)
     env.create_connection("esketamine", "ect")
     env.create_connection("ect", "remission")
-    env.create_connection("ect", "intake")
+    env.create_connection("ect", "ad")
 
     generate_networkx_graph(env)
 
