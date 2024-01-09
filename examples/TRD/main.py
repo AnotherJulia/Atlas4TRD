@@ -1,5 +1,6 @@
 from core import Environment, Factory
 from utilities import generate_networkx_graph
+from patient import Patient
 
 if __name__ == '__main__':
     env = Environment(time=0, dt=1) # dt = 1week
@@ -49,7 +50,7 @@ if __name__ == '__main__':
 
     generate_networkx_graph(env)
 
-    factory = Factory(config="../../config/agent_params.json")
+    factory = Factory(config="../../config/agent_params.json", agent_class_type=Patient)
     env.connect_factory(factory)
 
     # Set up the initial conditions of the pathway
