@@ -29,13 +29,15 @@ class Environment:
 
             # Adding new agents to the intake
             self.factory_tick()
+            print(f"time {self.time}")
+            print(f"before {self.event_queue}")
             self.process_events_up_to(self.time)
+            print(f"after {self.event_queue}")
 
             self.collect_data()
             self.time += self.dt
 
             if verbose: self.print_progress()
-
 
     def print_progress(self):
         print(f"----- Time: {self.time} -----")
@@ -90,9 +92,8 @@ class Environment:
         heapq.heappush(self.event_queue, (event.time, event))
 
     def process_events_up_to(self, end_time):
-        from core import Event
         while self.event_queue and self.event_queue[0][0] <= end_time:
-            _, next_event = heapq.heappop(self.event_queue)
+            execution_time, next_event = heapq.heappop(self.event_queue)
             next_event.process(environment=self)
 
     def collect_data(self):
@@ -107,7 +108,6 @@ class Environment:
 
             self.data['bubble_occupancies'][bubble.slug].append(occupancy)
             self.data['waiting_list'][bubble.slug].append(waiting)
-
 
     def connect_factory(self, factory):
         factory.connect_environment(self)
@@ -127,7 +127,6 @@ class Environment:
             intake_bubble.add_agent(new_agent)
 
     def create_initial_agents(self, num_agents, initial_bubble_slug):
-        from core import TreatmentEvent, StateBubble
 
         for _ in range(num_agents):
             initial_bubble = next(bubble for bubble in self.bubbles if bubble.slug == initial_bubble_slug)
@@ -139,6 +138,9 @@ class Environment:
 
             self.agents.append(agent)  # Add the agents to the environment storage
             initial_bubble.add_agent(agent)  # Add the agents to their initial bubble
+
+            if initial_bubble_slug == "intake":
+                agent.decide_and_schedule_next_event()
 
     def set_patient_rate(self, patient_rate):
         # TODO: Make the Patient Rate varied per dt (week) / mean / sd

@@ -7,6 +7,9 @@ class TreatmentEvent(Event):
         self.agent = agent
         self.treatment_bubble = treatment_bubble
 
+    def __repr__(self):
+        return f"Treatment Event({self.time}) @ {self.treatment_bubble}"
+
     def process(self, environment):
         import random
 

@@ -3,7 +3,7 @@ from utilities import generate_networkx_graph
 from patient import Patient
 
 if __name__ == '__main__':
-    env = Environment(time=0, dt=1) # dt = 1week
+    env = Environment(time=0, dt=1)  # dt = 1week
 
     env.create_state(slug="intake", description="Patients coming into the TRD care pathway", depth=0, env=env)
     env.create_state(slug="remission", description="Patients coming out of the pathway", depth=0, env=env)
@@ -48,7 +48,7 @@ if __name__ == '__main__':
     env.create_connection("ect", "remission")
     env.create_connection("ect", "ad")
 
-    generate_networkx_graph(env)
+    # generate_networkx_graph(env)
 
     factory = Factory(config="../../config/agent_params.json", agent_class_type=Patient)
     env.connect_factory(factory)
@@ -69,5 +69,4 @@ if __name__ == '__main__':
     steps = ["ad", "ap", "ad_ap", "esketamine", "ect"]
 
     env.plot_occupancies(steps)
-    env.plot_waiting_queues(steps)
-
+    env.plot_waiting_queues(states)

@@ -14,7 +14,8 @@ class StateBubble(Bubble):
         super().add_agent(agent)  # call the base class method to add the agent
 
         if self.slug == "intake":
-            agent.decide_and_schedule_next_event()
+            # agent.decide_and_schedule_next_event()
+            pass
         elif self.slug == "remission":
             # Keep them there, no further action needed
             pass

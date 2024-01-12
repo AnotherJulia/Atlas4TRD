@@ -28,7 +28,6 @@ class StepBubble(Bubble):
     def update(self):
         self.check_available_spots()
 
-
     def add_agent(self, agent):
         from core import TreatmentEvent
 
