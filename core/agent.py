@@ -9,12 +9,14 @@ class Agent:
         self.current_bubble = initial_bubble
         self.event_slug_dict = {}
 
+        self.medical_history = {}
+
     def __str__(self):
         return f'{self.id} @ {self.current_bubble}'
 
-    def move_agent(self, bubble):
-        self.current_bubble = bubble
-        bubble.add_agent(agent=self)
+    # def move_agent(self, bubble):
+    #     self.current_bubble = bubble
+    #     bubble.add_agent(agent=self)
 
     def decide_and_schedule_next_event(self, event_time=None):
 

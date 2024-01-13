@@ -99,11 +99,9 @@ class Environment:
 
     def collect_data(self):
         self.data['time'].append(self.time)
-
         for bubble in self.bubbles:
             occupancy = bubble.get_occupancy()
             waiting = bubble.get_waiting()
-            print(f"Waiting for {bubble.slug}: {waiting}")  # print the value for debugging
             if bubble.slug not in self.data['bubble_occupancies']:
                 self.data['bubble_occupancies'][bubble.slug] = []
                 self.data['waiting_list'][bubble.slug] = []
@@ -111,41 +109,9 @@ class Environment:
             self.data['bubble_occupancies'][bubble.slug].append(occupancy)
             self.data['waiting_list'][bubble.slug].append(waiting)
 
-        print(self.data['waiting_list'])
-
     def connect_factory(self, factory):
         factory.connect_environment(self)
         self.factory = factory
-
-    # def factory_tick(self):
-    #     if not self.factory:
-    #         raise ValueError("Factory not set up yet")
-    #
-    #     # Select the intake bubble
-    #     intake_bubble = next(bubble for bubble in self.bubbles if bubble.slug == "intake")
-    #     if intake_bubble is None:
-    #         return ValueError("No Intake Bubble Found")
-    #
-    #     for _ in range(self.patient_rate):
-    #         new_agent = self.factory.create_agent(intake_bubble)
-    #         self.agents.append(new_agent)  # Add the agents to the environment storage
-    #         intake_bubble.add_agent(new_agent)
-    #
-    # def create_initial_agents(self, num_agents, initial_bubble_slug):
-    #
-    #     initial_bubble = next(bubble for bubble in self.bubbles if bubble.slug == initial_bubble_slug)
-    #
-    #     if initial_bubble is None:
-    #         raise ValueError(f"{initial_bubble_slug} not found in environment bubbles")
-    #
-    #     for _ in range(num_agents):
-    #         self.create_and_add_agent(initial_bubble)
-    #
-    # def create_and_add_agent(self, initial_bubble):
-    #     agent = self.factory.create_agent(initial_bubble)
-    #     self.agents.append(agent)  # Add the agents to the environment storage
-    #     initial_bubble.add_agent(agent)  # Add the agents to their initial bubble
-    #     agent.decide_and_schedule_next_event()
 
     def find_bubble_by_name(self, name):
         return next(bubble for bubble in self.bubbles if bubble.slug == name)
