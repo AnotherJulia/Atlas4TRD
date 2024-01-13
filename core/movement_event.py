@@ -14,14 +14,16 @@ class MovementEvent(Event):
     def process(self, environment):
         from core import StepBubble, TreatmentEvent, StateBubble, MovementEvent
 
-        print(f"Processing MovementEvent: Agent {self.agent.id} from {self.start_bubble.slug} to {self.end_bubble.slug}")
+        # print(f"Processing MovementEvent: Agent {self.agent.id} from
+        # {self.start_bubble.slug} to {self.end_bubble.slug}")
 
         if self.agent.current_bubble != self.start_bubble:
             # print(
             #     f"Warning: Agent {self.agent.id} is not in the expected start bubble {self.start_bubble.slug}.
             #     Current bubble: {self.agent.current_bubble.slug}")
             # Optionally, reschedule the event or take other appropriate actions
-            raise ValueError(f"Agent {self.agent.id} is not in the expected start bubble")
+            raise ValueError(f"Agent {self.agent.id} is not in the expected start bubble. "
+                             f"Start {self.start_bubble.slug} | Current {self.agent.current_bubble.slug}")
 
         # Move the agent from start to end bubble
         self.start_bubble.remove_agent(self.agent)

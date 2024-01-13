@@ -53,6 +53,12 @@ class Factory:
 
         return self.agent_class(**agent_params)
 
+    def create_and_add_agents(self, bubble, environment):
+        new_agent = self.create_agent(bubble)
+        environment.agents.append(new_agent)
+        bubble.add_agent(new_agent)
+        new_agent.decide_and_schedule_next_event()
+
     def create_agents(self, num_agents, start_bubble):
         agents = []
         for _ in range(num_agents):

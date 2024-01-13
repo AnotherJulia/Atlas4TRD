@@ -10,7 +10,7 @@ class StateBubble(Bubble):
         return f"Bubble: {self.slug} | Occupancy: {len(self.current_agents)}"
 
     def add_agent(self, agent):
-        from core import MovementEvent
+        # from core import MovementEvent
         super().add_agent(agent)  # call the base class method to add the agent
 
         if self.slug == "intake":
@@ -21,7 +21,8 @@ class StateBubble(Bubble):
             pass
         elif self.slug == "relapse":
             # Schedule a movement event back to intake
-            event_time = self.environment.time + self.environment.dt        # TODO: MODEL DATE UNTIL RELAPSE
-
-            movement_event = MovementEvent(event_time, agent, self, self.get_connected_bubbles("intake"))
-            self.environment.schedule_event(movement_event)
+            # event_time = self.environment.time + self.environment.dt        # TODO: MODEL DATE UNTIL RELAPSE
+            #
+            # movement_event = MovementEvent(event_time, agent, self, self.get_connected_bubbles("intake"))
+            # self.environment.schedule_event(movement_event)
+            pass

@@ -24,10 +24,16 @@ class TreatmentEvent(Event):
 
         if random.random() < remission_chance:
             # Agent goes into remission
-            next_bubble_slug = "remission" if random.random() >= relapse_chance else "relapse"
+            next_bubble_slug = "remission"
+
+            if random.random() < relapse_chance:
+                next_bubble_slug = "relapse"
+
         elif random.random() < response_chance:
             # Agent responds but doesn't go into remission, tries same treatment again
-            next_bubble_slug = self.treatment_bubble.slug
+            self.schedule_treatment_event(event_time, environment)
+            return
+
         else:
             # Agent doesn't respond, needs new treatment
             next_bubble_slug, _ = self.agent.decide_next_event()
@@ -43,7 +49,8 @@ class TreatmentEvent(Event):
 
         self.schedule_movement_event(next_bubble, event_time, environment)
 
-    def find_next_bubble(self, bubble_slug, environment):
+    @staticmethod
+    def find_next_bubble(bubble_slug, environment):
         for bubble in environment.bubbles:
             if bubble.slug == bubble_slug:
                 return bubble
@@ -53,3 +60,7 @@ class TreatmentEvent(Event):
         from core import MovementEvent
         movement_event = MovementEvent(event_time, self.agent, self.treatment_bubble, next_bubble)
         environment.schedule_event(movement_event)
+
+    def schedule_treatment_event(self, event_time, environment):
+        treatment_event = TreatmentEvent(event_time, self.agent, self.treatment_bubble)
+        environment.schedule_event(treatment_event)

@@ -17,17 +17,17 @@ if __name__ == '__main__':
 
     # LEVEL 1 : AUGMENTED THERAPIES
 
-    env.create_step(slug="ad", description="AD Treatment, 12wks", capacity=10, config="../../config/ad_config.json",
+    env.create_step(slug="ad", description="AD Treatment, 12wks", capacity=63, config="../../config/ad_config.json",
                     depth=1, env=env)
     env.create_connection(start_slug="intake", end_slug="ad")
     env.create_connection("ad", "remission")
 
-    env.create_step(slug="ap", description="AP treatment, 28wks", capacity=10, config="../../config/ap_config.json",
+    env.create_step(slug="ap", description="AP treatment, 28wks", capacity=5, config="../../config/ap_config.json",
                     depth=1, env=env)
     env.create_connection(start_slug="intake", end_slug="ap")
     env.create_connection("ap", "remission")
 
-    env.create_step(slug="ad_ap", description="AP+AD treatment, 28wks", capacity=10,
+    env.create_step(slug="ad_ap", description="AP+AD treatment, 28wks", capacity=37,
                     config="../../config/ad_ap_config.json", depth=1, env=env)
     env.create_connection(start_slug="intake", end_slug="ad_ap")
     env.create_connection("ad_ap", "remission")
@@ -42,7 +42,7 @@ if __name__ == '__main__':
 
     # LEVEL 3: ECT
 
-    env.create_step(slug="ect", description="ECT Treatment, 28wks", capacity=10, config="../../config/ect_config.json",
+    env.create_step(slug="ect", description="ECT Treatment, 28wks", capacity=5, config="../../config/ect_config.json",
                     depth=3, env=env)
     env.create_connection("esketamine", "ect")
     env.create_connection("ect", "remission")
@@ -54,19 +54,11 @@ if __name__ == '__main__':
     env.connect_factory(factory)
 
     # Set up the initial conditions of the pathway
-    env.create_initial_agents(2, "ad")
-    env.create_initial_agents(2, "ap")
-    env.create_initial_agents(2, "ad_ap")
-    env.create_initial_agents(2, "intake")
-    env.create_initial_agents(2, "esketamine")
-    env.create_initial_agents(2, "ect")
+    env.set_patient_rate(25)         # this means 2 patients a week coming into the trd pathway
 
-    env.set_patient_rate(1)         # this means 2 patients a week coming into the trd pathway
+    env.run(until=52, verbose=False)
 
-    env.run(until=52, verbose=True)
-
-    states = ["intake", "remission", "relapse"]
-    steps = ["ad", "ap", "ad_ap", "esketamine", "ect"]
-
-    env.plot_occupancies(steps)
-    env.plot_waiting_queues(states)
+    # states = ["intake", "remission", "relapse"]
+    # steps = ["ad", "ap", "ad_ap", "esketamine", "ect"]
+    # env.plot_occupancies(steps)
+    # env.plot_waiting_queues(steps)

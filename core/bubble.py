@@ -23,7 +23,7 @@ class Bubble:
         return len(self.current_agents)
 
     def add_agent(self, agent):
-        print(f"Adding agent {agent.id} to {self.slug}")
+        # print(f"Adding agent {agent.id} to {self.slug}")
         self.current_agents.append(agent)
 
     # def remove_agent(self, agent):
@@ -31,17 +31,19 @@ class Bubble:
     #         print(f"Removing agent {agent.id} from {self.slug}")
     #         self.current_agents.remove(agent)
     #     else:
-    #         raise ValueError(f"Agent {agent.id} not found in bubble {self.slug}. Current bubble: {agent.current_bubble.slug}")
+    #         raise ValueError(f"Agent {agent.id} not found in bubble {self.slug}. "
+    #                          f"Current bubble: {agent.current_bubble.slug}")
 
     def remove_agent(self, agent):
         if agent in self.current_agents:
-            print(f"Removing agent {agent.id} from {self.slug}")
+            # print(f"Removing agent {agent.id} from {self.slug}")
             self.current_agents.remove(agent)
         else:
             # Handling the case where the agent is not found in the current bubble
             agent_current_bubble_slug = agent.current_bubble.slug if agent.current_bubble else "None"
             print(
-                f"Error: Attempted to remove agent {agent.id} from {self.slug}, but the agent was not found. Agent's current bubble: {agent_current_bubble_slug}")
+                f"Error: Attempted to remove agent {agent.id} from {self.slug}, but the "
+                f"agent was not found. Agent's current bubble: {agent_current_bubble_slug}")
 
     def connect(self, other_bubble):
         # Connects bubble objects to others

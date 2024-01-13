@@ -3,7 +3,7 @@ import uuid
 
 class Environment:
     def __init__(self, time, dt):
-        self.patient_rate = None
+        self.patient_rate = 0
         self.id = uuid.uuid4()
         self.time = time
         self.dt = dt
@@ -28,11 +28,12 @@ class Environment:
                 bubble.update()
 
             # Adding new agents to the intake
-            self.factory_tick()
-            print(f"time {self.time}")
-            print(f"before {self.event_queue}")
+            self.create_agent(initial_bubble_slug="intake", num_agents=self.patient_rate)
+
+            # print(f"Time: {self.time}")
+            # print(f"Before: {self.event_queue}")
             self.process_events_up_to(self.time)
-            print(f"after {self.event_queue}")
+            # print(f"After: {self.event_queue}")
 
             self.collect_data()
             self.time += self.dt
@@ -102,6 +103,7 @@ class Environment:
         for bubble in self.bubbles:
             occupancy = bubble.get_occupancy()
             waiting = bubble.get_waiting()
+            print(f"Waiting for {bubble.slug}: {waiting}")  # print the value for debugging
             if bubble.slug not in self.data['bubble_occupancies']:
                 self.data['bubble_occupancies'][bubble.slug] = []
                 self.data['waiting_list'][bubble.slug] = []
@@ -109,38 +111,66 @@ class Environment:
             self.data['bubble_occupancies'][bubble.slug].append(occupancy)
             self.data['waiting_list'][bubble.slug].append(waiting)
 
+        print(self.data['waiting_list'])
+
     def connect_factory(self, factory):
         factory.connect_environment(self)
         self.factory = factory
 
-    def factory_tick(self):
+    # def factory_tick(self):
+    #     if not self.factory:
+    #         raise ValueError("Factory not set up yet")
+    #
+    #     # Select the intake bubble
+    #     intake_bubble = next(bubble for bubble in self.bubbles if bubble.slug == "intake")
+    #     if intake_bubble is None:
+    #         return ValueError("No Intake Bubble Found")
+    #
+    #     for _ in range(self.patient_rate):
+    #         new_agent = self.factory.create_agent(intake_bubble)
+    #         self.agents.append(new_agent)  # Add the agents to the environment storage
+    #         intake_bubble.add_agent(new_agent)
+    #
+    # def create_initial_agents(self, num_agents, initial_bubble_slug):
+    #
+    #     initial_bubble = next(bubble for bubble in self.bubbles if bubble.slug == initial_bubble_slug)
+    #
+    #     if initial_bubble is None:
+    #         raise ValueError(f"{initial_bubble_slug} not found in environment bubbles")
+    #
+    #     for _ in range(num_agents):
+    #         self.create_and_add_agent(initial_bubble)
+    #
+    # def create_and_add_agent(self, initial_bubble):
+    #     agent = self.factory.create_agent(initial_bubble)
+    #     self.agents.append(agent)  # Add the agents to the environment storage
+    #     initial_bubble.add_agent(agent)  # Add the agents to their initial bubble
+    #     agent.decide_and_schedule_next_event()
+
+    def find_bubble_by_name(self, name):
+        return next(bubble for bubble in self.bubbles if bubble.slug == name)
+
+    def create_agent(self, initial_bubble_slug=None, num_agents=None):
+
+        if initial_bubble_slug is None:
+            print(f"No initial bubble inserted, using the first inserted bubble as starting point.")
+            return self.bubbles[0].name  # if none is used, just return the first bubble inserted into the env
+
+        initial_bubble = self.find_bubble_by_name(initial_bubble_slug)
+
         if not self.factory:
-            raise ValueError("Factory not set up yet")
+            raise ValueError("Factory is not set up yet. Please connect it to the environment.")
 
-        # Select the intake bubble
-        intake_bubble = next(bubble for bubble in self.bubbles if bubble.slug == "intake")
-        if intake_bubble is None:
-            return ValueError("No Intake Bubble Found")
+        if num_agents is not None:
+            for _ in range(num_agents):
+                self.factory.create_and_add_agents(bubble=initial_bubble, environment=self)
 
-        for _ in range(self.patient_rate):
-            new_agent = self.factory.create_agent(intake_bubble)
-            intake_bubble.add_agent(new_agent)
+        elif num_agents is None:
+            for _ in range(self.patient_rate):
+                self.factory.create_and_add_agents(bubble=initial_bubble, environment=self)
 
-    def create_initial_agents(self, num_agents, initial_bubble_slug):
-
-        for _ in range(num_agents):
-            initial_bubble = next(bubble for bubble in self.bubbles if bubble.slug == initial_bubble_slug)
-
-            if initial_bubble is None:
-                raise ValueError(f"{initial_bubble_slug} not found in environment bubbles")
-
-            agent = self.factory.create_agent(initial_bubble)
-
-            self.agents.append(agent)  # Add the agents to the environment storage
-            initial_bubble.add_agent(agent)  # Add the agents to their initial bubble
-
-            if initial_bubble_slug == "intake":
-                agent.decide_and_schedule_next_event()
+        else:
+            raise ValueError(f"Unable to create and add agents. @env.create_agent")
 
     def set_patient_rate(self, patient_rate):
         # TODO: Make the Patient Rate varied per dt (week) / mean / sd
