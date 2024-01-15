@@ -6,6 +6,17 @@ class StateBubble(Bubble):
     def __init__(self, slug, description, depth, env):
         super().__init__(slug, description, depth, env)
 
+        self.relapse_function = None
+
+        from utilities import PHQ9Analysis
+        self.phq_analysis = PHQ9Analysis()
+
+        if slug == "remission":
+            self.relapse_function = self.phq_analysis.generate_relapse_function_maintenance()
+
+        if slug == "recovered":
+            self.relapse_function = self.phq_analysis.generate_relapse_function_discontinued()
+
     def __str__(self):
         return f"Bubble: {self.slug} | Occupancy: {len(self.current_agents)}"
 
@@ -17,7 +28,10 @@ class StateBubble(Bubble):
             # agent.decide_and_schedule_next_event()
             pass
         elif self.slug == "remission":
-            # Keep them there, no further action needed
+            # Test them for relapse up until the 6 month - taking up medical cost
+            pass
+        elif self.slug == "recovered":
+            # Test them for relapse -- no longer taking up medical costs
             pass
         elif self.slug == "relapse":
             # Schedule a movement event back to intake
@@ -25,4 +39,8 @@ class StateBubble(Bubble):
             #
             # movement_event = MovementEvent(event_time, agent, self, self.get_connected_bubbles("intake"))
             # self.environment.schedule_event(movement_event)
+
+
+
+
             pass
