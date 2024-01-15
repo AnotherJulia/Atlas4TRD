@@ -9,6 +9,7 @@ class StepBubble(Bubble):
         self.capacity = capacity
         self.waiting_queue = []
 
+
         # Treatment specific parameters (non-changing)
         self.treatment_config = treatment_config
         self.treatment_parameters = read_config(treatment_config)

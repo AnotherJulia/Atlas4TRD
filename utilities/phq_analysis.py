@@ -1,14 +1,14 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy.stats import norm
-from scipy.interpolate import UnivariateSpline, interp1d
+from scipy.interpolate import interp1d
 from scipy.optimize import curve_fit
 
 
 class PHQ9Analysis:
     def __init__(self):
         self.relapse_threshold = 6
-        self.time_points = {"baseline": 0, "6wk": 1.5, "12wk": 3, "26wk": 6.5, "39wk": 9.75, "52wk": 13}
+        self.time_points = {"baseline": 0, "6wk": 6, "12wk": 12, "26wk": 26, "39wk": 39, "52wk": 52}
 
         # PHQ-9 scores data for maintenance and discontinued groups
         self.phq_scores_maintenance = {
@@ -54,8 +54,6 @@ class PHQ9Analysis:
             interval_prob = sorted_probs[i] - sorted_probs[i - 1]
             interval_probs.append(max(interval_prob, 0))  # Ensure non-negative probabilities
         return interval_probs
-
-
 
     def calculate_cumulative_probability(self, time_point, interval_probs, time_values):
         cumulative_probability = 0
@@ -139,24 +137,16 @@ class PHQ9Analysis:
         return L / (1 + np.exp(-k * (x - x0)))
 
     def plot_cumulative_probabilities(self, group_type="maintenance"):
-            def calculate_cumulative_params(probabilities_method):
-                cumulative_probs = [
-                    self.calculate_cumulative_probability(time, probabilities_method, self.sorted_times) for time
-                    in time_interval]
-                return cumulative_probs, curve_fit(logistic_function, time_interval, np.array(cumulative_probs), p0=(1, 1, 1))
-
             time_interval = np.array([0, 1.5, 3, 6.5, 9.75, 13])  # Time points
             smooth_time = np.linspace(0, 13, 1000)  # More points for smoother curve
-            def logistic_function(x, L, k, x0):
-                return L / (1 + np.exp(-k * (x - x0)))
 
             probabilities_method = self.interval_probs_maintenance if group_type == "maintenance" else self.interval_probs_discontinued
 
-            cumulative_probs, (params, _) = calculate_cumulative_params(probabilities_method)
+            cumulative_probs, (params, _) = self.calculate_cumulative_params(probabilities_method)
 
             plt.figure(figsize=(10, 6))
             plt.plot(time_interval, cumulative_probs, 'o', label=f'{group_type.capitalize()} Group Data')
-            plt.plot(smooth_time, logistic_function(smooth_time, *params), label=f'{group_type.capitalize()} Group Logistic Fit', linestyle='--')
+            plt.plot(smooth_time, self.logistic_function(smooth_time, *params), label=f'{group_type.capitalize()} Group Logistic Fit', linestyle='--')
             plt.title('Cumulative Probability of Relapse Over Time (Logistic Fit)')
             plt.xlabel('Time (months)')
             plt.ylabel('Cumulative Probability')
@@ -165,19 +155,6 @@ class PHQ9Analysis:
             plt.show()
 
             return cumulative_probs, params
-
-    def calculate_cumulative_params(self, group_type="maintenance"):
-        def logistic_function(x, L, k, x0):
-            return L / (1 + np.exp(-k * (x - x0)))
-
-        time_interval = np.array([0, 1.5, 3, 6.5, 9.75, 13])  # Time points
-        probabilities_method = self.interval_probs_maintenance if group_type == "maintenance" else self.interval_probs_discontinued
-
-        cumulative_probs = [self.calculate_cumulative_probability(time, probabilities_method, self.sorted_times) for
-                            time in time_interval]
-        params, _ = curve_fit(logistic_function, time_interval, np.array(cumulative_probs), p0=(1, 1, 1))
-
-        return cumulative_probs, params
 
     def calculate_cumulative_params(self, group_type="maintenance", specific_time=None):
         def logistic_function(x, L, k, x0):
@@ -201,65 +178,52 @@ class PHQ9Analysis:
             raise ValueError(f"Don't have that group_type: {group_type}")
 
     def interpolate_probability_intervals(self, interval):
-        #ensure timepoints and interval_probs are of same length
+        # ensure timepoints and interval_probs are of same length
         assert len(interval) == len(self.sorted_time_values)
 
+        # Create interpolation function using scipy interp1d
+        interpolation_function = interp1d(list(self.sorted_time_values), interval, kind='cubic',
+                                          fill_value="extrapolate")
 
-        #Create interpolation function using scipy interp1d
-        #We use 'log' interpolation, to match the logarithmic function mentioned
-        interpolation_function = interp1d(list(self.sorted_time_values), np.log1p(interval), kind='cubic', fill_value="extrapolate")
+        new_time_points = np.arange(0, 52+1, 1)  # Creating new set of time points from 1 to 52*4.34 (inclusive)
 
-        new_time_points = np.arange(1, 19, 1)  # Creating new set of time points from 1 to 52 (inclusive)
+        # Get interpolated values for new set of timepoints
+        interpolated_values = interpolation_function(new_time_points)
 
-        # return interpolated values for new set of timepoints
-        return np.expm1(interpolation_function(new_time_points))
+        # Normalize interpolated_values so they sum to 1
+        interpolated_values /= interpolated_values.sum()
 
+        return interpolated_values
 
-#
+    def time_to_relapse(self, group_type="maintenance"):
+        # Get the relapse probability intervals
+        interval_probs = np.array(self.return_probability_intervals(group_type=group_type))
 
+        # Transform these from interval probabilities to a cumulative distribution
+        cumulative_probs = np.cumsum(interval_probs)
 
-# Customizing the appearance of the continuous curves
+        # Draw a random number between 0 and 1
+        random_prob = np.random.random()
 
-#
-# time_interval = np.arange(0, 52, 2)
-# def plot_cumulative_probabilties(time_interval, interval_probs, sorted_times, label="Cumulative Probability"):
-#     probs = [calculate_cumulative_probability(time, interval_probs, sorted_times) for time in time_interval]
-#     # Create a plot for cumulative probabilities
-#     plt.figure(figsize=(10, 6))
-#     plt.plot(time_interval, probs, label='Group')
-#     plt.title('Cumulative Probability of Relapse Over Time')
-#     plt.xlabel('Time (months)')
-#     plt.ylabel('Cumulative Probability')
-#     plt.legend()
-#     plt.grid(True)
-#     plt.show()
-# # plot_cumulative_probabilties(time_interval, interval_probs_maintenance, sorted_times, label="Maintenance")
-# # plot_cumulative_probabilties(time_interval, interval_probs_discontinued, sorted_times, label="Discontinued")
-# # Your data points
-# time_interval = np.array([0, 1.5, 3, 6.5, 9.75, 13])  # Time points
-# cumulative_probs_maintenance = [calculate_cumulative_probability(time, interval_probs_maintenance, sorted_times) for time in time_interval]
-# cumulative_probs_discontinued = [calculate_cumulative_probability(time, interval_probs_discontinued, sorted_times) for time in time_interval]
-# cumulative_probs_maintenance_np = np.array(cumulative_probs_maintenance)
-# cumulative_probs_discontinued_np = np.array(cumulative_probs_discontinued)
-# # Define the logistic function
-# def logistic_function(x, L, k, x0):
-#     return L / (1 + np.exp(-k * (x - x0)))
-# # Fit the logistic function to your data with improved initial guesses
-# params_maintenance, _ = curve_fit(logistic_function, time_interval, cumulative_probs_maintenance, p0=(1, 1, 1))
-# params_discontinued, _ = curve_fit(logistic_function, time_interval, cumulative_probs_discontinued, p0=(1, 1, 1))
-# # Generate a smoother curve
-# smooth_time = np.linspace(0, 13, 1000)  # More points for smoother curve
-# smooth_probs_maintenance = logistic_function(smooth_time, *params_maintenance)
-# smooth_probs_discontinued = logistic_function(smooth_time, *params_discontinued)
-# # Create a plot for cumulative probabilities with the logistic curves
-# plt.figure(figsize=(10, 6))
-# plt.plot(time_interval, cumulative_probs_maintenance, 'o', label='Maintenance Group Data')
-# plt.plot(smooth_time, smooth_probs_maintenance, label='Maintenance Group Logistic Fit', linestyle='--')
-# plt.plot(time_interval, cumulative_probs_discontinued, 'o', label='Discontinued Group Data')
-# plt.plot(smooth_time, smooth_probs_discontinued, label='Discontinued Group Logistic Fit', linestyle='--')
-# plt.title('Cumulative Probability of Relapse Over Time (Logistic Fit)')
-# plt.xlabel('Time (months)')
-# plt.ylabel('Cumulative Probability')
-# plt.legend()
-# plt.grid(True)
-# plt.show()
+        # Find the week this number lands at in the cumulative distribution
+        relapse_week = np.searchsorted(cumulative_probs, random_prob)
+
+        return relapse_week
+
+    def plot_interpolated_probability_intervals(self, interval):
+        # Get the interpolated probabilities
+        interpolated_probabilities = self.interpolate_probability_intervals(interval)
+
+        # Create a new set of time points in weeks
+        new_time_points = np.arange(0, 52+1, 1)
+
+        # Create the plot
+        plt.figure(figsize=(10, 6))
+        plt.plot(new_time_points, interpolated_probabilities, label='Interpolated Probabilities')
+        plt.title('Interpolated Probability Intervals Over Time')
+        plt.xlabel('Time (weeks)')
+        plt.ylabel('Probability')
+        plt.legend()
+        plt.grid(True)
+        plt.show()
+

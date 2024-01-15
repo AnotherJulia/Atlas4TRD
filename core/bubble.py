@@ -26,6 +26,10 @@ class Bubble:
         # print(f"Adding agent {agent.id} to {self.slug}")
         self.current_agents.append(agent)
 
+        from core import MedicalHistoryLog
+        medical_log = MedicalHistoryLog(self.slug, self.environment.time)
+        agent.medical_history.append(medical_log)
+
     # def remove_agent(self, agent):
     #     if agent in self.current_agents:
     #         print(f"Removing agent {agent.id} from {self.slug}")

@@ -122,7 +122,6 @@ class GroupData:
         plt.axhline(y=0.5, color='gray', linestyle=':', linewidth=1)
         plt.show()
 
-
     def interp_plot(self, interval_probs, interp_kind='cubic'):
         sorted_time_values_np = np.array(self.sorted_time_values)
         interval_probs_np = np.array(interval_probs)
@@ -163,7 +162,6 @@ class GroupData:
         plt.legend()
         plt.grid(True)
         plt.show()
-
 
 def compare_interval_probs(group_data1, interval_probs1, group_data2, interval_probs2, interp_kind='cubic'):
     # Interpolate the interval probabilities for the first group

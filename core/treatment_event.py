@@ -26,9 +26,6 @@ class TreatmentEvent(Event):
             # Agent goes into remission
             next_bubble_slug = "remission"
 
-            if random.random() < relapse_chance:
-                next_bubble_slug = "relapse"
-
         elif random.random() < response_chance:
             # Agent responds but doesn't go into remission, tries same treatment again
             self.schedule_treatment_event(event_time, environment)

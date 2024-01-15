@@ -1,5 +1,3 @@
-import math
-
 num_employees = 24
 contact_ratio = 0.5
 weekly_hours = 40
@@ -12,3 +10,5 @@ hours_a_patient = 2
 # Determine the Psychology department capacity each week
 capacity = total_contact_hours / hours_a_patient
 print(capacity)
+
+

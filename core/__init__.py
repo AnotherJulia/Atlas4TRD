@@ -8,3 +8,4 @@ from .environment import Environment
 from .event import Event
 from .treatment_event import TreatmentEvent
 from .movement_event import MovementEvent
+from .history import MedicalHistoryLog
