@@ -24,24 +24,24 @@ if __name__ == '__main__':
 
     # LEVEL 1 : AUGMENTED THERAPIES
 
-    env.create_step(slug="ad", description="AD Treatment, 4wks", capacity=13, config="../../config/ad_config.json",
+    env.create_step(slug="ad", description="AD Treatment, 4wks", capacity=10, config="../../config/ad_config.json",
                     depth=1, env=env)
     env.create_connection(start_slug="intake", end_slug="ad")
     env.create_connection("ad", "remission")
 
-    env.create_step(slug="ap", description="AP treatment, 4wks", capacity=10, config="../../config/ap_config.json",
+    env.create_step(slug="ap", description="AP treatment, 4wks", capacity=6, config="../../config/ap_config.json",
                     depth=1, env=env)
     env.create_connection(start_slug="intake", end_slug="ap")
     env.create_connection("ap", "remission")
 
-    env.create_step(slug="ad_ap", description="AP+AD treatment, 4wks", capacity=10,
+    env.create_step(slug="ad_ap", description="AP+AD treatment, 4wks", capacity=5,
                     config="../../config/ad_ap_config.json", depth=1, env=env)
     env.create_connection(start_slug="intake", end_slug="ad_ap")
     env.create_connection("ad_ap", "remission")
 
     # LEVEL 2: ESKETAMINE TREATMENT
 
-    env.create_step(slug="esketamine", description="Esketamine treatment, 4wks", capacity=15,
+    env.create_step(slug="esketamine", description="Esketamine treatment, 4wks", capacity=27,
                     config="../../config/esketamine_config.json", depth=2, env=env)
     env.create_connection(start_slug="ad", end_slug="esketamine")
     env.create_connection(start_slug="ap", end_slug="esketamine")
@@ -63,7 +63,7 @@ if __name__ == '__main__':
     env.create_agent("intake", 1)
 
     # Set up the initial conditions of the pathway
-    env.set_patient_rate(3)         # this means 2 patients a week coming into the trd pathway
+    env.set_patient_rate(1)         # this means 2 patients a week coming into the trd pathway
 
     env.run(until=500, verbose=True)
     #
