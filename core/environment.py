@@ -90,6 +90,15 @@ class Environment:
         self.connections.append(connection)
 
     def schedule_event(self, event):
+        from core import MedicalHistoryLog, TreatmentEvent, MovementEvent
+        #
+        # if isinstance(event, TreatmentEvent):
+        #     event_log = MedicalHistoryLog("treatment-event", event.treatment_bubble, event.time)
+        # elif isinstance(event, MovementEvent):
+        #     event_log = MedicalHistoryLog("move-event", event.start_bubble, event.time, end_bubble=event.end_bubble)
+        # else:
+        #     event_log = None
+
         heapq.heappush(self.event_queue, (event.time, event))
 
     def process_events_up_to(self, end_time):

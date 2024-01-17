@@ -18,6 +18,14 @@ class Agent:
     #     self.current_bubble = bubble
     #     bubble.add_agent(agent=self)
 
+    def add_to_medical_history(self, event_type, event_data, time):
+        event_with_id = {
+            "patient_id": self.id,
+            "type": event_type,
+            "data": event_data,
+            "time": time
+        }
+        self.medical_history.append(event_with_id)
 
     def decide_and_schedule_next_event(self, event_time=None):
 

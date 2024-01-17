@@ -15,6 +15,10 @@ class TreatmentEvent(Event):
 
         event_time = self.time + self.treatment_bubble.duration
 
+        event_data = {
+            "treatment": self.treatment_bubble.slug,
+        }
+
         # Determine outcome of treatment
         remission_chance, response_chance, relapse_chance = (
             self.treatment_bubble.remission_rate,
@@ -25,14 +29,17 @@ class TreatmentEvent(Event):
         if random.random() < remission_chance:
             # Agent goes into remission
             next_bubble_slug = "remission"
+            event_data["state"] = "remission"
 
         elif random.random() < response_chance:
             # Agent responds but doesn't go into remission, tries same treatment again
+            event_data["state"] = "response"
             self.schedule_treatment_event(event_time, environment)
             return
 
         else:
             # Agent doesn't respond, needs new treatment
+            event_data["state"] = "no_response"
             next_bubble_slug, _ = self.agent.decide_next_event()
 
         if next_bubble_slug == "stay":
@@ -44,6 +51,7 @@ class TreatmentEvent(Event):
         if next_bubble is None:
             raise ValueError(f"No bubble found with slug '{next_bubble_slug}'")
 
+        self.agent.add_to_medical_history(event_type="treatment_end", event_data=event_data, time=event_time)
         self.schedule_movement_event(next_bubble, event_time, environment)
 
     @staticmethod

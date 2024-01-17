@@ -26,17 +26,10 @@ class Bubble:
         # print(f"Adding agent {agent.id} to {self.slug}")
         self.current_agents.append(agent)
 
-        from core import MedicalHistoryLog
-        medical_log = MedicalHistoryLog(self.slug, self.environment.time)
-        agent.medical_history.append(medical_log)
-
-    # def remove_agent(self, agent):
-    #     if agent in self.current_agents:
-    #         print(f"Removing agent {agent.id} from {self.slug}")
-    #         self.current_agents.remove(agent)
-    #     else:
-    #         raise ValueError(f"Agent {agent.id} not found in bubble {self.slug}. "
-    #                          f"Current bubble: {agent.current_bubble.slug}")
+        event_data = {
+            "bubble": self.slug
+        }
+        agent.add_to_medical_history(event_type="bubble-change", time=self.environment.time, event_data=event_data)
 
     def remove_agent(self, agent):
         if agent in self.current_agents:

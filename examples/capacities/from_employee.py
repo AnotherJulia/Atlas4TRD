@@ -1,3 +1,7 @@
+import math
+
+total_employees = 20
+
 # Estimating the number of employees in the depression care system
 # using a range of 10% to 20% of the psychiatric department workforce
 lower_bound_percentage_depression = 0.20
@@ -19,7 +23,6 @@ upper_bound_estimate_treatment = upper_bound_estimate_depression
 # Estimating the proportion of MDD among depression patients
 lower_bound_mdd_proportion = 0.30
 upper_bound_mdd_proportion = 0.40
-
 
 # Calculating the proportion of TRD patients among all depression patients
 lower_bound_trd_proportion = lower_bound_mdd_proportion
