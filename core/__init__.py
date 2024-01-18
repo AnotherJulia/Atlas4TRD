@@ -8,3 +8,9 @@ from .environment import Environment
 from .event import Event
 from .treatment_event import TreatmentEvent
 from .movement_event import MovementEvent
+<<<<<<< HEAD
+=======
+from .history import MedicalHistoryLog
+
+from .analyzis import *
+>>>>>>> origin/packaging/framework

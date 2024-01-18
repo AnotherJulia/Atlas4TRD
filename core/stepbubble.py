@@ -9,6 +9,10 @@ class StepBubble(Bubble):
         self.capacity = capacity
         self.waiting_queue = []
 
+<<<<<<< HEAD
+=======
+
+>>>>>>> origin/packaging/framework
         # Treatment specific parameters (non-changing)
         self.treatment_config = treatment_config
         self.treatment_parameters = read_config(treatment_config)
@@ -28,14 +32,25 @@ class StepBubble(Bubble):
     def update(self):
         self.check_available_spots()
 
+<<<<<<< HEAD
 
+=======
+>>>>>>> origin/packaging/framework
     def add_agent(self, agent):
         from core import TreatmentEvent
 
         # Check if the bubble's capacity allows adding the agent
         if len(self.current_agents) < self.capacity:
             # Add the agent to the bubble
+<<<<<<< HEAD
             super().add_agent(agent)
+=======
+            self.current_agents.append(agent)
+            event_data = {
+                "treatment": self.slug,
+            }
+            agent.add_to_medical_history(event_type="treatment_enter", time=self.environment.time, event_data=event_data)
+>>>>>>> origin/packaging/framework
 
             # Schedule a TreatmentEvent
             event_time = self.environment.time + self.duration
@@ -43,13 +58,25 @@ class StepBubble(Bubble):
             self.environment.schedule_event(treatment_event)
         else:
             # Add the agent to the waiting queue if capacity is full
+<<<<<<< HEAD
+=======
+            event_data = {
+            }
+
+            agent.add_to_medical_history(event_type="waiting", time=self.environment.time, event_data=event_data)
+
+>>>>>>> origin/packaging/framework
             self.waiting_queue.append(agent)
 
     def check_available_spots(self):
         if len(self.current_agents) < self.capacity and len(self.waiting_queue) != 0:
             # let's allow the next agent from the waiting list into the bubble!
             next_agent = self.waiting_queue.pop(0)
+<<<<<<< HEAD
             self.current_agents.append(next_agent)
+=======
+            self.add_agent(next_agent)
+>>>>>>> origin/packaging/framework
 
     def get_waiting(self):
         return len(self.waiting_queue)

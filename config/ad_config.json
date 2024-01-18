@@ -1,5 +1,9 @@
 {
+<<<<<<< HEAD
    "duration": 14,
+=======
+   "duration": 8,
+>>>>>>> origin/packaging/framework
    "cost": 5000,
    "response_rate": 0.402,
    "remission_rate": 0.34,

@@ -23,6 +23,7 @@ class Bubble:
         return len(self.current_agents)
 
     def add_agent(self, agent):
+<<<<<<< HEAD
         print(f"Adding agent {agent.id} to {self.slug}")
         self.current_agents.append(agent)
 
@@ -36,12 +37,30 @@ class Bubble:
     def remove_agent(self, agent):
         if agent in self.current_agents:
             print(f"Removing agent {agent.id} from {self.slug}")
+=======
+        # print(f"Adding agent {agent.id} to {self.slug}")
+        self.current_agents.append(agent)
+
+        event_data = {
+            "bubble": self.slug
+        }
+        agent.add_to_medical_history(event_type="bubble-change", time=self.environment.time, event_data=event_data)
+
+    def remove_agent(self, agent):
+        if agent in self.current_agents:
+            # print(f"Removing agent {agent.id} from {self.slug}")
+>>>>>>> origin/packaging/framework
             self.current_agents.remove(agent)
         else:
             # Handling the case where the agent is not found in the current bubble
             agent_current_bubble_slug = agent.current_bubble.slug if agent.current_bubble else "None"
             print(
+<<<<<<< HEAD
                 f"Error: Attempted to remove agent {agent.id} from {self.slug}, but the agent was not found. Agent's current bubble: {agent_current_bubble_slug}")
+=======
+                f"Error: Attempted to remove agent {agent.id} from {self.slug}, but the "
+                f"agent was not found. Agent's current bubble: {agent_current_bubble_slug}")
+>>>>>>> origin/packaging/framework
 
     def connect(self, other_bubble):
         # Connects bubble objects to others

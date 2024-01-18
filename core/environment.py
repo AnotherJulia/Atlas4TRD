@@ -3,7 +3,11 @@ import uuid
 
 class Environment:
     def __init__(self, time, dt):
+<<<<<<< HEAD
         self.patient_rate = None
+=======
+        self.patient_rate = 0
+>>>>>>> origin/packaging/framework
         self.id = uuid.uuid4()
         self.time = time
         self.dt = dt
@@ -28,15 +32,27 @@ class Environment:
                 bubble.update()
 
             # Adding new agents to the intake
+<<<<<<< HEAD
             self.factory_tick()
             self.process_events_up_to(self.time)
+=======
+            self.create_agent(initial_bubble_slug="intake", num_agents=self.patient_rate)
+
+            # print(f"Time: {self.time}")
+            # print(f"Before: {self.event_queue}")
+            self.process_events_up_to(self.time)
+            # print(f"After: {self.event_queue}")
+>>>>>>> origin/packaging/framework
 
             self.collect_data()
             self.time += self.dt
 
             if verbose: self.print_progress()
 
+<<<<<<< HEAD
 
+=======
+>>>>>>> origin/packaging/framework
     def print_progress(self):
         print(f"----- Time: {self.time} -----")
         print(f"----- Bubble occupancies:")
@@ -87,17 +103,37 @@ class Environment:
         self.connections.append(connection)
 
     def schedule_event(self, event):
+<<<<<<< HEAD
         heapq.heappush(self.event_queue, (event.time, event))
 
     def process_events_up_to(self, end_time):
         from core import Event
         while self.event_queue and self.event_queue[0][0] <= end_time:
             _, next_event = heapq.heappop(self.event_queue)
+=======
+        from core import MedicalHistoryLog, TreatmentEvent, MovementEvent
+        #
+        # if isinstance(event, TreatmentEvent):
+        #     event_log = MedicalHistoryLog("treatment-event", event.treatment_bubble, event.time)
+        # elif isinstance(event, MovementEvent):
+        #     event_log = MedicalHistoryLog("move-event", event.start_bubble, event.time, end_bubble=event.end_bubble)
+        # else:
+        #     event_log = None
+
+        heapq.heappush(self.event_queue, (event.time, event))
+
+    def process_events_up_to(self, end_time):
+        while self.event_queue and self.event_queue[0][0] <= end_time:
+            execution_time, next_event = heapq.heappop(self.event_queue)
+>>>>>>> origin/packaging/framework
             next_event.process(environment=self)
 
     def collect_data(self):
         self.data['time'].append(self.time)
+<<<<<<< HEAD
 
+=======
+>>>>>>> origin/packaging/framework
         for bubble in self.bubbles:
             occupancy = bubble.get_occupancy()
             waiting = bubble.get_waiting()
@@ -108,11 +144,15 @@ class Environment:
             self.data['bubble_occupancies'][bubble.slug].append(occupancy)
             self.data['waiting_list'][bubble.slug].append(waiting)
 
+<<<<<<< HEAD
 
+=======
+>>>>>>> origin/packaging/framework
     def connect_factory(self, factory):
         factory.connect_environment(self)
         self.factory = factory
 
+<<<<<<< HEAD
     def factory_tick(self):
         if not self.factory:
             raise ValueError("Factory not set up yet")
@@ -139,6 +179,32 @@ class Environment:
 
             self.agents.append(agent)  # Add the agents to the environment storage
             initial_bubble.add_agent(agent)  # Add the agents to their initial bubble
+=======
+    def find_bubble_by_name(self, name):
+        return next(bubble for bubble in self.bubbles if bubble.slug == name)
+
+    def create_agent(self, initial_bubble_slug=None, num_agents=None):
+
+        if initial_bubble_slug is None:
+            print(f"No initial bubble inserted, using the first inserted bubble as starting point.")
+            return self.bubbles[0].name  # if none is used, just return the first bubble inserted into the env
+
+        initial_bubble = self.find_bubble_by_name(initial_bubble_slug)
+
+        if not self.factory:
+            raise ValueError("Factory is not set up yet. Please connect it to the environment.")
+
+        if num_agents is not None:
+            for _ in range(num_agents):
+                self.factory.create_and_add_agents(bubble=initial_bubble, environment=self)
+
+        elif num_agents is None:
+            for _ in range(self.patient_rate):
+                self.factory.create_and_add_agents(bubble=initial_bubble, environment=self)
+
+        else:
+            raise ValueError(f"Unable to create and add agents. @env.create_agent")
+>>>>>>> origin/packaging/framework
 
     def set_patient_rate(self, patient_rate):
         # TODO: Make the Patient Rate varied per dt (week) / mean / sd

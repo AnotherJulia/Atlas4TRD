@@ -30,7 +30,11 @@ class TestStepBubble(unittest.TestCase):
         self.assertIn(agent3, self.step_bubble.waiting_queue)
         self.assertNotIn(agent3, self.step_bubble.current_agents)
 
+<<<<<<< HEAD
         print(self.step_bubble)
+=======
+        # print(self.step_bubble)
+>>>>>>> origin/packaging/framework
 
 
 if __name__ == '__main__':
