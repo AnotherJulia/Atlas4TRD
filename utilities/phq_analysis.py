@@ -194,6 +194,19 @@ class PHQ9Analysis:
         interpolated_values /= interpolated_values.sum()
 
         return interpolated_values
+    
+    # @TOM HERE IS THE FUNCTION TO USE
+    '''
+    t: time to calculate
+    p: general probability to even relapse
+
+    output: probability to relapse at time t
+    '''
+    def get_prob_at_time(self, t, type="maintenance", p=0.3):
+        intervals = self.return_probability_intervals(group_type=type)
+        interpolated_values = self.interpolate_probability_intervals(intervals)
+
+        return interpolated_values[t]*p
 
     def time_to_relapse(self, group_type="maintenance"):
         # Get the relapse probability intervals
