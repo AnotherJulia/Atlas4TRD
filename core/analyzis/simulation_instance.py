@@ -42,12 +42,6 @@ class SimulationInstance:
 
         return patient_logs
 
-    # def process_patient_log(self, log):
-    #     patient_id = self.extract_patient_id(log)
-    #     if patient_id not in self.patient_journeys:
-    #         self.patient_journeys[patient_id] = PatientJourney(patient_id)
-    #     self.patient_journeys[patient_id].add_event(log)
-
     def printout(self):
         print("PATIENT PROFILES")
         print(self.patient_profiles.values())

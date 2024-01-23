@@ -7,6 +7,18 @@ from patient import Patient
 states = ["intake", "remission", "relapse"]
 steps = ["ad", "ap", "ad_ap", "esketamine", "ect"]
 
+capacities = {
+      "total": 50,
+      "ad": 0.3,
+      "ad_ap": 0.15,
+      "ap": 0.12,
+      "esk": 0.4,
+      "ect": 0.0375
+}
+
+def get_capacity(name):
+    total = capacities["total"]
+    return round(total * capacities[name], 0)
 
 def run_simulation(simulation_id):
     env = Environment(time=0, dt=1)  # dt = 1week
@@ -16,9 +28,6 @@ def run_simulation(simulation_id):
     env.create_state(slug="relapse", description="Patients relapsing from the remission bubble", depth=0, env=env)
     env.create_state(slug="recovery", description="Patients relapsing from the remission bubble", depth=0, env=env)
 
-    # TODO: ADD STATE SUICIDE / DEATH
-    # TODO: CURRENTLY = RELAPSE -> INTAKE; SHOULD CHANGE THIS TO SOMETHING MORE ACCURATE
-
     env.create_connection("remission", "recovery")
     env.create_connection("remission", "relapse")
     env.create_connection("recovery", "relapse")
@@ -26,24 +35,24 @@ def run_simulation(simulation_id):
 
     # LEVEL 1 : AUGMENTED THERAPIES
 
-    env.create_step(slug="ad", description="AD Treatment, 8wks", capacity=14, config="../../config/ad_config.json",
+    env.create_step(slug="ad", description="AD Treatment, 8wks", capacity=get_capacity("ad"), config="../../config/ad_config.json",
                     depth=1, env=env)
     env.create_connection(start_slug="intake", end_slug="ad")
     env.create_connection("ad", "remission")
 
-    env.create_step(slug="ap", description="AP treatment, 8wks", capacity=12, config="../../config/ap_config.json",
+    env.create_step(slug="ap", description="AP treatment, 8wks", capacity=get_capacity("ap"), config="../../config/ap_config.json",
                     depth=1, env=env)
     env.create_connection(start_slug="intake", end_slug="ap")
     env.create_connection("ap", "remission")
 
-    env.create_step(slug="ad_ap", description="AP+AD treatment, 8wks", capacity=12,
+    env.create_step(slug="ad_ap", description="AP+AD treatment, 8wks", capacity=get_capacity("ad_ap"),
                     config="../../config/ad_ap_config.json", depth=1, env=env)
     env.create_connection(start_slug="intake", end_slug="ad_ap")
     env.create_connection("ad_ap", "remission")
 
     # LEVEL 2: ESKETAMINE TREATMENT
 
-    env.create_step(slug="esketamine", description="Esketamine treatment, 12wks", capacity=10,
+    env.create_step(slug="esketamine", description="Esketamine treatment, 12wks", capacity=get_capacity("esk"),
                     config="../../config/esketamine_config.json", depth=2, env=env)
     env.create_connection(start_slug="ad", end_slug="esketamine")
     env.create_connection(start_slug="ap", end_slug="esketamine")
@@ -51,7 +60,7 @@ def run_simulation(simulation_id):
 
     # LEVEL 3: ECT
 
-    env.create_step(slug="ect", description="ECT Treatment, 28wks", capacity=2, config="../../config/ect_config.json",
+    env.create_step(slug="ect", description="ECT Treatment, 28wks", capacity=get_capacity("ect"), config="../../config/ect_config.json",
                     depth=3, env=env)
     env.create_connection("esketamine", "ect")
     env.create_connection("ect", "remission")
@@ -67,14 +76,14 @@ def run_simulation(simulation_id):
     # env.create_agent("ap", 2)
     # env.create_agent("ad_ap", 3)
     # env.create_agent("esketamine", 3)
-    # env.create_agent("ect", 1)
+    env.create_agent("intake", 1000)
 
     env.set_patient_rate(1)  # this means 1 patient a week coming into the trd pathway
 
-    env.run(until=100, verbose=False)
+    env.run(until=150, verbose=False)
 
     # env.plot_occupancies()
-    # env.plot_waiting_queues()
+    env.plot_waiting_queues()
 
     from core import SimulationInstance
     instance = SimulationInstance(run_id=simulation_id, agents=env.agents)
@@ -84,13 +93,12 @@ def run_simulation(simulation_id):
 if __name__ == "__main__":
     num_sims = 1
     simulation_instances = []
+
     for index in range(num_sims):
         print(f"Simulation {index}")
         run_simulation(simulation_id=index)
 
-    # Transform the dataframe into an Analyzer object that will help us get some data
-
     analyzer = SimAnalyzer(simulation_instances)
-    analyzer.print_logs()
+    # analyzer.print_logs()
 
     analyzer.run()

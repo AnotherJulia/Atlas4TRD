@@ -68,7 +68,7 @@ plt.step(sorted_time_values, interval_probs_discontinued, label='Discontinued Gr
 plt.xticks(sorted_time_values, sorted_times)
 plt.xlabel('Time (months)')
 # Adding a y-axis label
-plt.ylabel('Probability of Relapse in Interval')
+plt.ylabel('Probability of Relapse in Interx    val')
 # Customizing the title
 plt.title('Interval Relapse Probability Over Time for Maintenance and Discontinued Groups', fontsize=14)
 # Customizing legend

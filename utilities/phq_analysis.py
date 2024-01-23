@@ -232,11 +232,10 @@ class PHQ9Analysis:
 
         # Create the plot
         plt.figure(figsize=(10, 6))
-        plt.plot(new_time_points, interpolated_probabilities, label='Interpolated Probabilities')
-        plt.title('Interpolated Probability Intervals Over Time')
+        plt.plot(new_time_points, interpolated_probabilities, label='Maintenance Group')
+        plt.title('b')
         plt.xlabel('Time (weeks)')
         plt.ylabel('Probability')
-        plt.legend()
         plt.grid(True)
         plt.show()
 
