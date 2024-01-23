@@ -6,11 +6,11 @@ class SimAnalyzer:
         self.simulation_instances = simulation_instances
 
     def print_logs(self, run_id=None):
-        # if run_id is None:
-        #     for simulation in self.simulation_instances:
-        #         simulation.printout()
-        # else:
-        #     self.simulation_instances[run_id].printout()
+        if run_id is None:
+            for simulation in self.simulation_instances:
+                simulation.printout()
+        else:
+            self.simulation_instances[run_id].printout()
 
         for instance in self.simulation_instances:
             print(instance.patient_profiles)
@@ -34,7 +34,7 @@ class SimAnalyzer:
             "average_waiting_time": 0,
             "total_events": 0,
             # ... other metrics you want to calculate
-        }
+         }
 
         total_treatment_duration = 0
         total_waiting_time = 0
@@ -47,8 +47,8 @@ class SimAnalyzer:
 
         num_journeys = len(patient_data)
         if num_journeys > 0:
-            aggregated["average_treatment_duration"] = total_treatment_duration / num_journeys
-            aggregated["average_waiting_time"] = total_waiting_time / num_journeys
+            aggregated["average_treatment_duration"] = int(total_treatment_duration / num_journeys)
+            aggregated["average_waiting_time"] = int(total_waiting_time / num_journeys)
             aggregated["total_events"] = total_events
 
         return aggregated

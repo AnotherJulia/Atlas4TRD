@@ -1,13 +1,14 @@
 
 class SimulationInstance:
 
-    def __init__(self, run_id, agents):
+    def __init__(self, run_id, agents, run_data=None):
         self.id = run_id
         self.agents = agents
-        self.patient_profiles = self.create_patient_profiles()
+        self.run_data = run_data
 
+        self.patient_profiles = self.create_patient_profiles()
         self.patient_logs = self.process_patient_logs()
-        self.patient_journeys = {}
+        # self.patient_journeys = {}
 
     def create_patient_profiles(self):
         from core import PatientProfile

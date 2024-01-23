@@ -14,6 +14,7 @@ upper_bound_estimate_depression = total_employees * upper_bound_percentage_depre
 
 # Estimating the number of employees qualified to treat patients
 # using a range of 60% to 70% of the estimated depression care workforce
+# -- removed
 
 # Calculating the estimated number of employees qualified to treat patients
 # in the depression care system

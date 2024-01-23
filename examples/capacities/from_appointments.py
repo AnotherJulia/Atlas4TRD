@@ -1,4 +1,3 @@
-import numpy as np
 
-# Number of appointments each day
-n_app = np.array([147340])
+# Number of appointments each day in the entire EMC
+n_app = 147340

@@ -1,7 +1,7 @@
 from core import Environment, Factory, SimAnalyzer
 from patient import Patient
-from utilities import generate_networkx_graph
-import pandas as pd
+# from utilities import generate_networkx_graph
+# import pandas as pd
 
 # What states to plot
 states = ["intake", "remission", "relapse"]
