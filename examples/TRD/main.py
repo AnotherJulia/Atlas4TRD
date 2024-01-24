@@ -1,3 +1,9 @@
+import sys
+print(sys.path)
+
+import os
+sys.path.append(os.path.join(os.path.dirname(__file__), '..', '..'))
+
 from core import Environment, Factory, SimAnalyzer
 from patient import Patient
 # from utilities import generate_networkx_graph
@@ -8,13 +14,27 @@ states = ["intake", "remission", "relapse"]
 steps = ["ad", "ap", "ad_ap", "esketamine", "ect"]
 
 capacities = {
-      "total": 50,
+     "total": 50,
       "ad": 0.3,
       "ad_ap": 0.15,
       "ap": 0.12,
       "esk": 0.4,
       "ect": 0.0375
 }
+
+def vary_capacities(capacities):
+
+    total_value = 0
+    for key, value in capacities.items():
+        if key !=  "total":
+            total_value += value
+
+    if total_value != 1:
+        difference = 1 - total_value
+
+        # re-distribute the capacities again based on existing proportions
+        print(difference)
+
 
 def get_capacity(name):
     total = capacities["total"]

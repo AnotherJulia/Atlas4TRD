@@ -54,7 +54,7 @@ class Bubble:
         return bubble
 
     def get_waiting(self):
-        return 0    # waiting list implemented in child objects
+        return 0.0    # waiting list implemented in child objects
 
 
 

@@ -70,8 +70,9 @@ class Environment:
 
     def create_connection(self, start_slug, end_slug):
         from core import Connection
-        global start_bubble
-        global end_bubble
+        
+        start_bubble = None
+        end_bubble = None
 
         for bubble in self.bubbles:
             if bubble.slug == start_slug:
@@ -90,20 +91,11 @@ class Environment:
         self.connections.append(connection)
 
     def schedule_event(self, event):
-        from core import MedicalHistoryLog, TreatmentEvent, MovementEvent
-        #
-        # if isinstance(event, TreatmentEvent):
-        #     event_log = MedicalHistoryLog("treatment-event", event.treatment_bubble, event.time)
-        # elif isinstance(event, MovementEvent):
-        #     event_log = MedicalHistoryLog("move-event", event.start_bubble, event.time, end_bubble=event.end_bubble)
-        # else:
-        #     event_log = None
-
         heapq.heappush(self.event_queue, (event.time, event))
 
     def process_events_up_to(self, end_time):
         while self.event_queue and self.event_queue[0][0] <= end_time:
-            execution_time, next_event = heapq.heappop(self.event_queue)
+            _, next_event = heapq.heappop(self.event_queue)
             next_event.process(environment=self)
 
     def collect_data(self):
