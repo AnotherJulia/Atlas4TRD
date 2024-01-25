@@ -140,9 +140,9 @@ class PHQ9Analysis:
             time_interval = np.array([0, 1.5, 3, 6.5, 9.75, 13])  # Time points
             smooth_time = np.linspace(0, 13, 1000)  # More points for smoother curve
 
-            probabilities_method = self.interval_probs_maintenance if group_type == "maintenance" else self.interval_probs_discontinued
+            # probabilities_method = self.interval_probs_maintenance if group_type == "maintenance" else self.interval_probs_discontinued
 
-            cumulative_probs, (params, _) = self.calculate_cumulative_params(probabilities_method)
+            cumulative_probs, (params, _) = self.calculate_cumulative_params(group_type)
 
             plt.figure(figsize=(10, 6))
             plt.plot(time_interval, cumulative_probs, 'o', label=f'{group_type.capitalize()} Group Data')
@@ -183,7 +183,7 @@ class PHQ9Analysis:
 
         # Create interpolation function using scipy interp1d
         interpolation_function = interp1d(list(self.sorted_time_values), interval, kind='cubic',
-                                          fill_value="extrapolate")
+                                          fill_value="interpolate")
 
         new_time_points = np.arange(0, 52+1, 1)  # Creating new set of time points from 1 to 52*4.34 (inclusive)
 

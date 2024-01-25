@@ -28,7 +28,7 @@ class SimAnalyzer:
         total_durations = []
         final_states = []
     
-        for index, instance in enumerate(self.simulation_instances):
+        for index,_ in enumerate(self.simulation_instances):
     
             outcomes = self.run_analysis(run_id=index)
             waiting_times.append(outcomes.waiting_time)

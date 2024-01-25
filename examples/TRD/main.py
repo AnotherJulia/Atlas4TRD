@@ -11,7 +11,7 @@ states = ["intake", "remission", "relapse"]
 steps = ["ad", "ap", "ad_ap", "esketamine", "ect"]
 
 capacities_distribution = {
-     "total": 1000,
+     "total": 50,
       "ad": 0.4,
       "ad_ap": 0.2,
       "ap": 0.10,
