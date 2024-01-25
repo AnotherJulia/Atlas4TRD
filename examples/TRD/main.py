@@ -100,7 +100,7 @@ def run_simulation(simulation_id):
     env.run(until=200, verbose=False)
 
     # env.plot_occupancies()
-    env.plot_waiting_queues(steps)
+    # env.plot_waiting_queues(steps)
 
     from core import SimulationInstance
     instance = SimulationInstance(run_id=simulation_id, agents=env.agents)
@@ -108,7 +108,7 @@ def run_simulation(simulation_id):
 
 
 if __name__ == "__main__":
-    num_sims = 1
+    num_sims = 5
     simulation_instances = []
 
     for index in range(num_sims):

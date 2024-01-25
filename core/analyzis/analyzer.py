@@ -1,4 +1,5 @@
 from collections import defaultdict
+import numpy as np
 
 class SimAnalyzer:
 
@@ -29,16 +30,18 @@ class SimAnalyzer:
             waiting_times.append(outcomes.waiting_time)
             n_relapse.append(outcomes.n_relapse)
             relapse_dicts.append(outcomes.relapses)
+
             print(f"----- INSTANCE #{index} -----")
             print("Average waiting times: ", outcomes.waiting_time)
             print("Average relapse events: ", outcomes.n_relapse)
         
         avg_waiting_times = sum(waiting_times)/len(waiting_times)
+        sd_waiting_times = np.std(waiting_times)
         avg_n_relapse = sum(n_relapse)/len(n_relapse)
         average_relapses = self.merge_and_average_dicts(relapse_dicts)
 
         print("----- SUMMARY -----")
-        print("Average waiting times: ", avg_waiting_times)
+        print(f"Average waiting times: {avg_waiting_times} ({sd_waiting_times})")
         print("Average # relapse events: ", avg_n_relapse)
         self.plot_n_relapse(average_relapses)
 
