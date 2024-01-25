@@ -24,7 +24,7 @@ class MovementEvent(Event):
         self.end_bubble.add_agent(self.agent)
         self.agent.current_bubble = self.end_bubble
 
-        # Handling different types of StateBubbles
+        # Handling different types of StateBubble
         if isinstance(self.end_bubble, StateBubble):
             if self.end_bubble.slug == "intake":
                 # Determine the next step for the agent

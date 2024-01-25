@@ -19,10 +19,14 @@ class SimAnalyzer:
         # Extract specific simulation instance corresponding with simulation ID
         return self.simulation_instances[simulation_id]
     
+
+    # Running the analyzer for multiple simulation instances
     def run(self):
         waiting_times = []
         n_relapse = []
         relapse_dicts = []
+        total_durations = []
+        final_states = []
     
         for index, instance in enumerate(self.simulation_instances):
     
@@ -30,35 +34,70 @@ class SimAnalyzer:
             waiting_times.append(outcomes.waiting_time)
             n_relapse.append(outcomes.n_relapse)
             relapse_dicts.append(outcomes.relapses)
+            total_durations.append(outcomes.total_duration)
+            final_states.append(outcomes.final_states)
 
             print(f"----- INSTANCE #{index} -----")
-            print("Average waiting times: ", outcomes.waiting_time)
+            print(f"Average waiting times (wk): {outcomes.waiting_time}")
             print("Average relapse events: ", outcomes.n_relapse)
+            print(f"Average time in system (wk): {outcomes.total_duration}")
+
+            # print(final_states)
         
         avg_waiting_times = sum(waiting_times)/len(waiting_times)
         sd_waiting_times = np.std(waiting_times)
+
         avg_n_relapse = sum(n_relapse)/len(n_relapse)
         average_relapses = self.merge_and_average_dicts(relapse_dicts)
 
         print("----- SUMMARY -----")
-        print(f"Average waiting times: {avg_waiting_times} ({sd_waiting_times})")
+        print(f"Average waiting times (wk): {avg_waiting_times} ({sd_waiting_times})")
         print("Average # relapse events: ", avg_n_relapse)
+
+        if len(total_durations) != 0:
+            avg_treatment_duration = sum(total_durations)/len(total_durations)
+            sd_treatment_duration = np.std(total_durations)
+            print(f"Average time in system (wk): {avg_treatment_duration} ({sd_treatment_duration})")
+        else:
+            print(f"Average time in the system (wk) : UNKNOWN")
+
+        # State distributions
+        avg_remission, avg_recovery, avg_in_treatment = self.find_percentages(final_states)
+        print(f"Remission: {avg_remission}, Recovery: {avg_recovery}, In treatment: {avg_in_treatment}")
+
+
         self.plot_n_relapse(average_relapses)
 
+
+    # Run the analysis for a single simulation instance
     def run_analysis(self, run_id=0, plot=False):
         instance = self.simulation_instances[run_id]
         patients = instance.patient_profiles
-        # run general analysis
-        # n_patients = len(patients)
-        # print("n_patients: ", n_patients)
-        # run patient by patient analysis
-        
+    
+
+        # Running the analysis for a all the patients
         analysis_outcomes = self.analyze_patients(patients)
         waiting_times = []
         relapses = {}
+        total_duration = []
+
+        final_states = {
+            "in_treatment": 0,
+            "remission": 0,
+            "recovery": 0,
+        }
         
         for outcome in analysis_outcomes:
             waiting_times.append(outcome.waiting_time)
+
+            if outcome.final_state == "in_treatment": final_states["in_treatment"] += 1
+            elif outcome.final_state == "remission": final_states["remission"] += 1
+            elif outcome.final_state == "recovery": final_states["recovery"] += 1
+            else: raise ValueError(f"ValueError: Outcome Final State not set up")
+            
+            if outcome.total_duration != 0:
+                total_duration.append(outcome.total_duration)
+
             if outcome.n_relapse in relapses.keys():
                 relapses[outcome.n_relapse] += 1
             else:
@@ -69,15 +108,66 @@ class SimAnalyzer:
         
         # avg_relapse = sum(relapses)/len(relapses)
         avg_waiting_time = sum(waiting_times)/len(waiting_times)
+
+        if len(total_duration) != 0:
+            avg_treatment_duration = sum(total_duration)/len(total_duration)
+        else:
+            avg_treatment_duration = 0
+
+        outcomes.total_duration = avg_treatment_duration
         outcomes.waiting_time = avg_waiting_time
         outcomes.n_relapse = int(self.average_relapses(relapses))
         outcomes.relapses = relapses
+        outcomes.final_states = final_states
         
         if plot:
             self.plot_n_relapse(relapses)
         
         return outcomes
     
+    def find_percentages(self, dicts):
+
+        percentages = []
+
+        # find percentages for each indiv dict
+        for states in dicts:
+            total_len = self.find_total_dict_length(states)
+            p = {}
+
+            for key, value in states.items():
+                p[key] = value / total_len
+
+            percentages.append(p)
+
+        # lets find the averages
+        
+        remission = []
+        recovery = []
+        in_treatment = []
+
+        for states in percentages:
+            remission.append(states["remission"])
+            recovery.append(states["recovery"])
+            in_treatment.append(states["in_treatment"])
+
+        avg_remission = np.mean(remission)
+        sd_remission = np.std(remission)
+
+        avg_recovery = np.mean(recovery)
+        sd_recovery = np.std(recovery)
+
+        avg_in_treatment = np.mean(in_treatment)
+        sd_in_treatment = np.std(in_treatment)
+
+        return avg_remission, avg_recovery, avg_in_treatment
+
+    
+    def find_total_dict_length(self, dictionary):
+        l = 0
+        for _, value in dictionary.items():
+            l += value
+        return l
+
     @staticmethod
     def average_relapses(relapses):
         total = sum(int(relapse) * count for relapse, count in relapses.items())
@@ -99,7 +189,8 @@ class SimAnalyzer:
         # Compute averages
         avg_dict = {k: total_counts[k] / count_per_key[k] for k in total_counts}
         return avg_dict
-    
+   
+    # Running analysis for all the patients
     def analyze_patients(self, patients):
         analysis_outcomes = []
         
@@ -108,12 +199,35 @@ class SimAnalyzer:
             analysis_outcomes.append(out)
         return analysis_outcomes
     
+    # Running the analysis for a single patient
     @staticmethod
     def analyze_patient(patient):
         from core.analyzis import AnalysisOutcomes
         analysis_outcomes = AnalysisOutcomes(patient.patient_id)
+
+        # find the total duration in the system (from intake to recovery)
+        if (patient.event_logs[-1]["type"] == "recovery"):
+            first_event_time = patient.event_logs[0]["time"]
+            recovery_time = patient.event_logs[-1]["time"]
+            total_duration = recovery_time - first_event_time
+            print(f"Total Duration: {total_duration}")
+            analysis_outcomes.total_duration = total_duration
+        else:
+            analysis_outcomes.total_duration = 0
+
+        # find the final state of the patient
+        if patient.event_logs[-1]["type"] == "movement_event" and patient.event_logs[-1]["data"]["state"] == "remission":
+            final_state = "remission"
+        elif patient.event_logs[-1]["type"] == "movement_event" and patient.event_logs[-1]["data"]["state"] == "recovery":
+            final_state = "recovery"
+        else:
+            final_state = "in_treatment"
+
+        analysis_outcomes.final_state = final_state
         
         for index, event in enumerate(patient.event_logs):
+
+            # Manage the waiting events -> adding to total waiting time
             if event["type"] == "waiting":
                 if index != len(patient.event_logs)-1:
                     next_event = patient.event_logs[index+1]

@@ -10,32 +10,51 @@ from patient import Patient
 states = ["intake", "remission", "relapse"]
 steps = ["ad", "ap", "ad_ap", "esketamine", "ect"]
 
-capacities = {
-     "total": 50,
+capacities_distribution = {
+     "total": 1000,
       "ad": 0.4,
-      "ad_ap": 0.15,
+      "ad_ap": 0.2,
       "ap": 0.10,
-      "esk": 0.2,
+      "esk": 0.4,
       "ect": 0.05
 }
 
-def vary_capacities(capacities):
+def determine_cap_values(distribution):
 
-    total_value = 0
-    for key, value in capacities.items():
-        if key !=  "total":
-            total_value += value
+    # first check if it adds up to 1 
+    t = 0
+    total_cap = 0
+    for key, value in distribution.items():
+        if key == "total":
+            total_cap = value
+           
+        else:
+            t += value
+    
+    # if it doesn't match -> redistribute
+    if t != 1:
+        dif = 1 - t
+        
+        for _, value in distribution.items():
+            part = value / t
+            value += part * dif
+    
+    # now the distribution should be totalling up to 1
 
-    if total_value != 1:
-        difference = 1 - total_value
+    capacities = {}
 
-        # re-distribute the capacities again based on existing proportions
-        print(difference)
+    for key, value in distribution.items():
+        if key != "total":
+            capacities[key] = round(value * total_cap,0)
+    
+    return capacities
+    
+capacities = determine_cap_values(capacities_distribution)
+print(f"Capacities: {capacities}")
 
+def get_capacity(slug):
+    return capacities[slug]
 
-def get_capacity(name):
-    total = capacities["total"]
-    return round(total * capacities[name], 0)
 
 def run_simulation(simulation_id):
     env = Environment(time=0, dt=1)  # dt = 1week
@@ -97,10 +116,11 @@ def run_simulation(simulation_id):
 
     env.set_patient_rate(1)  # this means 1 patient a week coming into the trd pathway
 
-    env.run(until=200, verbose=False)
+    env.run(until=2000, verbose=False)
 
-    # env.plot_occupancies()
-    # env.plot_waiting_queues(steps)
+    if simulation_id == 0:
+        # env.plot_occupancies()
+        env.plot_waiting_queues(steps)
 
     from core import SimulationInstance
     instance = SimulationInstance(run_id=simulation_id, agents=env.agents)
