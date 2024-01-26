@@ -10,6 +10,17 @@ class SimulationInstance:
         self.patient_logs = self.process_patient_logs()
         # self.patient_journeys = {}
 
+    def retrieve_occupancies(self):
+        if not self.run_data: 
+            return None
+        return self.run_data["bubble_occupancies"], self.run_data["time"]
+
+    def retrieve_waiting_list(self):
+        if not self.run_data:
+            return None
+        
+        return self.run_data["waiting_list"], self.run_data["time"]
+
     def create_patient_profiles(self):
         from core import PatientProfile
 

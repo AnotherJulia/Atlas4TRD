@@ -1,21 +1,22 @@
 import os, sys
 sys.path.append(os.path.join(os.path.dirname(__file__), '..', '..'))
 
+import numpy as np
+
 from core import Environment, Factory, SimAnalyzer
 from patient import Patient
 # from utilities import generate_networkx_graph
-# import pandas as pd
 
 # What states to plot
-states = ["intake", "remission", "relapse"]
+states = ["intake", "remission", "recovery", "relapse"]
 steps = ["ad", "ap", "ad_ap", "esketamine", "ect"]
 
 capacities_distribution = {
      "total": 50,
       "ad": 0.4,
-      "ad_ap": 0.2,
-      "ap": 0.10,
-      "esk": 0.4,
+      "ad_ap": 0.15,
+      "ap": 0.05,
+      "esk": 0.3,
       "ect": 0.05
 }
 
@@ -25,28 +26,33 @@ def determine_cap_values(distribution):
     t = 0
     total_cap = 0
     for key, value in distribution.items():
+        print(f"{key} = {value}")
         if key == "total":
             total_cap = value
-           
         else:
             t += value
-    
+  
+    print(f"Total Capacity: {total_cap}")
+    updated = {}
     # if it doesn't match -> redistribute
     if t != 1:
         dif = 1 - t
         
-        for _, value in distribution.items():
-            part = value / t
-            value += part * dif
+        for key, value in distribution.items():
+            if key == "total":
+                part = value / t
+                value += part * dif
+                updated[key] = value
     
     # now the distribution should be totalling up to 1
+    print(f"Capacity distribution: {updated}")
 
     capacities = {}
 
-    for key, value in distribution.items():
+    for key, value in updated.items():
         if key != "total":
             capacities[key] = round(value * total_cap,0)
-    
+
     return capacities
     
 capacities = determine_cap_values(capacities_distribution)
@@ -57,7 +63,7 @@ def get_capacity(slug):
 
 
 def run_simulation(simulation_id):
-    env = Environment(time=0, dt=1)  # dt = 1week
+    env = Environment(time=0, dt=1)  # dt = 1 week
 
     env.create_state(slug="intake", description="Patients coming into the TRD care pathway", depth=0, env=env)
     env.create_state(slug="remission", description="Patients coming out of the pathway", depth=0, env=env)
@@ -107,23 +113,19 @@ def run_simulation(simulation_id):
     factory = Factory(config="config/agent_params.json", agent_class_type=Patient)
     env.connect_factory(factory)
 
-    # Set up the initial conditions of the pathway
-    # env.create_agent("ad", 5)
-    # env.create_agent("ap", 2)
-    # env.create_agent("ad_ap", 3)
-    # env.create_agent("esketamine", 3)
+    # setup initial patients
     env.create_agent("intake", 1000)
-
     env.set_patient_rate(1)  # this means 1 patient a week coming into the trd pathway
 
-    env.run(until=2000, verbose=False)
+    env.run(until=250, verbose=False)
 
     if simulation_id == 0:
-        # env.plot_occupancies()
-        env.plot_waiting_queues(steps)
+        # env.plot_occupancies(states)
+        # env.plot_waiting_queues(steps)
+        pass
 
     from core import SimulationInstance
-    instance = SimulationInstance(run_id=simulation_id, agents=env.agents)
+    instance = SimulationInstance(run_id=simulation_id, agents=env.agents,run_data=env.data)
     simulation_instances.append(instance)
 
 

@@ -8,5 +8,5 @@ class AnalysisOutcomes:
         self.n_relapse = 0
         self.relapses = {}
 
-        self.final_state = ""
-        self.final_states = {}
+        # self.final_state = ""
+        # self.final_states = {}
