@@ -1,9 +1,8 @@
 import os, sys
 sys.path.append(os.path.join(os.path.dirname(__file__), '..', '..'))
 
-import numpy as np
-
 from core import Environment, Factory, SimAnalyzer
+from utilities import Capacity
 from patient import Patient
 # from utilities import generate_networkx_graph
 
@@ -11,56 +10,17 @@ from patient import Patient
 states = ["intake", "remission", "recovery", "relapse"]
 steps = ["ad", "ap", "ad_ap", "esketamine", "ect"]
 
-capacities_distribution = {
-     "total": 50,
-      "ad": 0.4,
-      "ad_ap": 0.15,
-      "ap": 0.05,
-      "esk": 0.3,
-      "ect": 0.05
+capacity_distribution = {
+    "total": 50,
+    "ad": 0.3,
+    "ap": 0.2,
+    "ad_ap": 0.2,
+    "esketamine": 0.2, 
+    "ect": 0.1
 }
 
-def determine_cap_values(distribution):
-
-    # first check if it adds up to 1 
-    t = 0
-    total_cap = 0
-    for key, value in distribution.items():
-        print(f"{key} = {value}")
-        if key == "total":
-            total_cap = value
-        else:
-            t += value
-  
-    print(f"Total Capacity: {total_cap}")
-    updated = {}
-    # if it doesn't match -> redistribute
-    if t != 1:
-        dif = 1 - t
-        
-        for key, value in distribution.items():
-            if key == "total":
-                part = value / t
-                value += part * dif
-                updated[key] = value
-    
-    # now the distribution should be totalling up to 1
-    print(f"Capacity distribution: {updated}")
-
-    capacities = {}
-
-    for key, value in updated.items():
-        if key != "total":
-            capacities[key] = round(value * total_cap,0)
-
-    return capacities
-    
-capacities = determine_cap_values(capacities_distribution)
-print(f"Capacities: {capacities}")
-
-def get_capacity(slug):
-    return capacities[slug]
-
+capacity = Capacity(capacity_distribution)
+print(f"Capacities: {capacity}")
 
 def run_simulation(simulation_id):
     env = Environment(time=0, dt=1)  # dt = 1 week
@@ -77,24 +37,24 @@ def run_simulation(simulation_id):
 
     # LEVEL 1 : AUGMENTED THERAPIES
 
-    env.create_step(slug="ad", description="AD Treatment, 8wks", capacity=get_capacity("ad"), config="config/ad_config.json",
+    env.create_step(slug="ad", description="AD Treatment, 8wks", capacity=capacity.retrieve_capacity("ad"), config="config/ad_config.json",
                     depth=1, env=env)
     env.create_connection(start_slug="intake", end_slug="ad")
     env.create_connection("ad", "remission")
 
-    env.create_step(slug="ap", description="AP treatment, 8wks", capacity=get_capacity("ap"), config="config/ap_config.json",
+    env.create_step(slug="ap", description="AP treatment, 8wks", capacity=capacity.retrieve_capacity("ap"), config="config/ap_config.json",
                     depth=1, env=env)
     env.create_connection(start_slug="intake", end_slug="ap")
     env.create_connection("ap", "remission")
 
-    env.create_step(slug="ad_ap", description="AP+AD treatment, 8wks", capacity=get_capacity("ad_ap"),
+    env.create_step(slug="ad_ap", description="AP+AD treatment, 8wks", capacity=capacity.retrieve_capacity("ad_ap"),
                     config="config/ad_ap_config.json", depth=1, env=env)
     env.create_connection(start_slug="intake", end_slug="ad_ap")
     env.create_connection("ad_ap", "remission")
 
     # LEVEL 2: ESKETAMINE TREATMENT
 
-    env.create_step(slug="esketamine", description="Esketamine treatment, 12wks", capacity=get_capacity("esk"),
+    env.create_step(slug="esketamine", description="Esketamine treatment, 12wks", capacity=capacity.retrieve_capacity("esketamine"),
                     config="config/esketamine_config.json", depth=2, env=env)
     env.create_connection(start_slug="ad", end_slug="esketamine")
     env.create_connection(start_slug="ap", end_slug="esketamine")
@@ -102,7 +62,7 @@ def run_simulation(simulation_id):
 
     # LEVEL 3: ECT
 
-    env.create_step(slug="ect", description="ECT Treatment, 28wks", capacity=get_capacity("ect"), config="config/ect_config.json",
+    env.create_step(slug="ect", description="ECT Treatment, 28wks", capacity=capacity.retrieve_capacity("ect"), config="config/ect_config.json",
                     depth=3, env=env)
     env.create_connection("esketamine", "ect")
     env.create_connection("ect", "remission")
@@ -121,7 +81,7 @@ def run_simulation(simulation_id):
 
     if simulation_id == 0:
         # env.plot_occupancies(states)
-        # env.plot_waiting_queues(steps)
+        env.plot_waiting_queues(steps)
         pass
 
     from core import SimulationInstance
