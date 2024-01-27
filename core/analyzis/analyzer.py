@@ -75,9 +75,10 @@ class SimAnalyzer:
         
         # Getting simulation run data specifically
         waiting_list, time = instance.retrieve_waiting_list()
-        # occupancies, time = instance.retrieve_occupancies()
+        occupancies, time = instance.retrieve_occupancies()
 
-        self.process_env_waiting_list(waiting_list, time, start_time=100) 
+        self.process_env_waiting_list(waiting_list, time, start_time=100)
+        self.process_env_occupancies(occupancies, time, start_time=100)
 
         # Running the analysis for all the patients
         analysis_outcomes = self.analyze_patients(patients)
@@ -271,5 +272,19 @@ class SimAnalyzer:
         
         plt.legend()
         plt.title("Waiting Lists")
+        plt.show()
+
+    def process_env_occupancies(self, occupancies, time, start_time=0):
+        import matplotlib.pyplot as plt
+        plt.figure(figsize=(10,6))
+        cut_time = time[start_time:]
+
+        for bubble, occupancies in occupancies.items():
+            if np.sum(occupancies) != 0:
+                cut = occupancies[start_time:]
+                plt.plot(cut_time, cut, label=bubble)
+
+        plt.legend()
+        plt.title("Occupancies")
         plt.show()
         
