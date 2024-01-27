@@ -21,6 +21,9 @@ class SimulationInstance:
         
         return self.run_data["waiting_list"], self.run_data["time"]
 
+    def retrieve_n_patients(self):
+        return len(self.agents)
+
     def create_patient_profiles(self):
         from core import PatientProfile
 

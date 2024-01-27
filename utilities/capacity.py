@@ -26,7 +26,7 @@ class Capacity:
             raise ValueError("No total capacity filled in.")
 
         total_capacity = self.capacities_distribution["total"]
-        print(f"Total Capacity: {total_capacity}")
+        # print(f"Total Capacity: {total_capacity}")
         capacities = {}
         
         sum = 0
@@ -34,7 +34,7 @@ class Capacity:
             if key != "total": 
                 sum += value
         
-        print(f"Sum: {sum}")
+        # print(f"Sum: {sum}")
 
         if sum == 1:
             for key, value in self.capacities_distribution.items():
@@ -43,21 +43,21 @@ class Capacity:
         
         else:
             difference = 1 - sum
-            print(f"Difference: {difference}")
+            # print(f"Difference: {difference}")
             
             for key, value in self.capacities_distribution.items():
                 if key != "total":
                     prop = value / total_capacity
                     capacities[key] = round((value + prop*difference) * total_capacity, 0)
 
-        print(capacities)
+        # print(capacities)
 
 
         # double check if total capacities match
         sum = 0
         for _, value in capacities.items():
             sum += value
-        print(f"Final capacities: {sum}")
+        # print(f"Final capacities: {sum}")
 
         if sum != total_capacity:
             raise ValueError("Capacities don't match.")

@@ -20,7 +20,7 @@ capacity_distribution = {
 }
 
 capacity = Capacity(capacity_distribution)
-print(f"Capacities: {capacity}")
+print(f"{capacity}")
 
 def run_simulation(simulation_id):
     env = Environment(time=0, dt=1)  # dt = 1 week
@@ -79,10 +79,10 @@ def run_simulation(simulation_id):
 
     env.run(until=250, verbose=False)
 
-    if simulation_id == 0:
-        # env.plot_occupancies(states)
-        env.plot_waiting_queues(steps)
-        pass
+    # if simulation_id == 0:
+    #     env.plot_occupancies(states)
+    #     env.plot_waiting_queues(steps)
+    #     pass
 
     from core import SimulationInstance
     instance = SimulationInstance(run_id=simulation_id, agents=env.agents,run_data=env.data)
@@ -100,4 +100,4 @@ if __name__ == "__main__":
     analyzer = SimAnalyzer(simulation_instances)
     # analyzer.print_logs()
 
-    analyzer.run()
+    analyzer.run(plot=True)
