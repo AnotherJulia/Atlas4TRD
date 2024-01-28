@@ -20,48 +20,29 @@ class Capacity:
 
     def assign_updated_capacity(self):
         print("Assigning Capacities")
-        # Check if it totals up to 0
-        
-        if not self.capacities_distribution["total"]:
-            raise ValueError("No total capacity filled in.")
+
+        # Validate that "total" is present in capacities_distribution
+        if "total" not in self.capacities_distribution:
+            raise ValueError("No total capacity provided.")
+
+        # Validate that "total" is a number
+        if not isinstance(self.capacities_distribution["total"], (int, float)):
+            raise ValueError("Total capacity must be a number.")
+
+        # # Ensure the sum of all proportions equal to 1
+        # proportions_sum = sum(val for key, val in self.capacities_distribution.items()
+        #                       if key != "total")
+        # if proportions_sum != 1:
+        #     raise ValueError(f"Capacities' proportions must add up to 1. => {proportions_sum}")
 
         total_capacity = self.capacities_distribution["total"]
-        # print(f"Total Capacity: {total_capacity}")
-        capacities = {}
-        
-        sum = 0
-        for key, value in self.capacities_distribution.items():
-            if key != "total": 
-                sum += value
-        
-        # print(f"Sum: {sum}")
+        capacities = {key: round(val * total_capacity, 0)
+                      for key, val in self.capacities_distribution.items()
+                      if key != "total"}
 
-        if sum == 1:
-            for key, value in self.capacities_distribution.items():
-                if key != "total":
-                    capacities[key] = round(value * total_capacity, 0)
-        
-        else:
-            difference = 1 - sum
-            # print(f"Difference: {difference}")
-            
-            for key, value in self.capacities_distribution.items():
-                if key != "total":
-                    prop = value / total_capacity
-                    capacities[key] = round((value + prop*difference) * total_capacity, 0)
-
-        # print(capacities)
-
-
-        # double check if total capacities match
-        sum = 0
-        for _, value in capacities.items():
-            sum += value
-        # print(f"Final capacities: {sum}")
-
-        if sum != total_capacity:
-            raise ValueError("Capacities don't match.")
-
+        # Validate that the individual capacities add up to the total
+        if sum(capacities.values()) != total_capacity:
+            raise ValueError(f"Capacities don't match the total.=> {sum(capacities.values())}")
 
         return capacities
 
