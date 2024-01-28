@@ -92,7 +92,7 @@ class MovementEvent(Event):
 
                 self.agent.add_to_medical_history(event_type="relapse", event_data=event_data, time=self.time)
 
-                next_bubble = next(bubble for bubble in environment.bubbles if bubble.slug == "esketamine")
+                next_bubble = next(bubble for bubble in environment.bubbles if bubble.slug == "intake")
                 movement_event = MovementEvent(self.time + environment.dt, self.agent, self.end_bubble, next_bubble)
                 environment.schedule_event(movement_event)
             else:

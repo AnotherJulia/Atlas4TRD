@@ -24,5 +24,6 @@
   },
   "patient_rate": 1,
   "simulation_duration": 700,
-  "agent_config": "config/agent_params.json"
+  "agent_config": "config/agent_params.json",
+  "event_dict_slug": {}
 }
