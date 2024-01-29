@@ -1,0 +1,29 @@
+{
+  "total_capacity": 50,
+  "states": [
+    {"slug": "intake", "description": "Patients coming into the TRD care pathway", "depth": 0, "connections": ["ad", "ap", "ad_ap"]},
+    {"slug": "remission", "description": "Patients coming out of the pathway", "depth": 0, "connections": ["recovery", "relapse"]},
+    {"slug": "relapse", "description": "Patients relapsing from the remission bubble", "depth": 0, "connections": ["intake"]},
+    {"slug": "recovery", "description": "Patients relapsing from the remission bubble", "depth": 0, "connections": ["relapse"]}
+  ],
+  "connections": [
+    {"start_slug": "remission", "end_slug": "recovery"},
+    {"start_slug": "remission", "end_slug": "relapse"},
+    {"start_slug": "recovery", "end_slug": "relapse"},
+    {"start_slug": "relapse", "end_slug": "intake"}
+  ],
+  "steps": [
+    {"slug": "ad", "description": "AD Treatment, 4wks", "capacity_ratio": 0.3, "config": "config/ad_config.json", "depth": 1, "connections": ["remission", "esketamine"]},
+    {"slug": "ap", "description": "AP treatment, 4wks", "capacity_ratio": 0.3, "config": "config/ap_config.json", "depth": 1, "connections": ["remission", "esketamine"]},
+    {"slug": "ad_ap", "description": "AP+AD treatment, 4wks", "capacity_ratio": 0.2, "config": "config/ad_ap_config.json", "depth": 1, "connections": ["remission", "esketamine"]},
+    {"slug": "esketamine", "description": "Esketamine treatment, 8wks", "capacity_ratio": 0.1, "config": "config/esketamine_config.json", "depth": 2, "connections": ["ect"]},
+    {"slug": "ect", "description": "ECT Treatment, 4 wks", "capacity_ratio": 0.1, "config": "config/ect_config.json", "depth": 3, "connections": ["remission", "ad"]}
+  ],
+  "initial_agents": {
+    "intake": 1000
+  },
+  "patient_rate": 1,
+  "simulation_duration": 700,
+  "agent_config": "config/agent_params.json",
+  "event_dict_slug": {}
+}

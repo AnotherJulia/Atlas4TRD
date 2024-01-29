@@ -12,7 +12,7 @@ def load_simulation_config(config_file):
     return config
 
 
-def run_simulation_w_config(name, sim_instances, config_path):
+def run_simulation_w_config(config_path):
     num_sims = 5
     simulation_instances = []
 
@@ -24,17 +24,23 @@ def run_simulation_w_config(name, sim_instances, config_path):
 
     for index in range(num_sims):
         print(f"Simulation {index}")
-        run_simulation(simulation_id=index, config=config,cap_dist=capacity_distribution, simulation_instances=simulation_instances)
+        run_simulation(simulation_id=index, config=config,cap_dist=capacity_distribution, 
+                       simulation_instances=simulation_instances)
 
-    analyzer = SimAnalyzer(simulation_instances)
-    analyzer.run(plot=True)
+    # analyzer = SimAnalyzer(simulation_instances)
+    # analyzer.run(plot=False)
 
-    sim_instances[name] = analyzer.simulation_instances
-    return sim_instances
+    return simulation_instances
 
 
 if __name__ == "__main__":
     sim_instances = {}
 
-    sum_instances = run_simulation_w_config(name="esketamine @ 0.2", sim_instances=sim_instances, config_path="config/structure_esketamine_2.json")
-
+    sim_instances["esketamine @ 0.1"] = run_simulation_w_config(
+            config_path="config/structure_esketamine_1.json")
+    sim_instances["esketamine @ 0.2"] = run_simulation_w_config(
+            config_path="config/structure_esketamine_2.json")
+    sim_instances["esketamine @ 0.4"] = run_simulation_w_config(
+            config_path="config/structure_esketamine_4.json")
+    sim_instances["default"] = run_simulation_w_config(
+            config_path="config/structure_default.json")

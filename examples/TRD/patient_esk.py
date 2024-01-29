@@ -4,7 +4,7 @@ from core.agent import Agent
 
 
 
-class Patient(Agent):
+class PatientEsk(Agent):
 
     def __init__(self, environment, initial_bubble, episode_duration, symptom_severity, functional_impairment,
                  treatment_failures):
@@ -14,15 +14,16 @@ class Patient(Agent):
         # Set up the decision-making choices
         self.event_slug_dict = {
             "intake": lambda: (random.choices(["ad", "ad_ap", "ap"], weights=[0.60, 0.34, 0.06])[0], 'movement'),
-            "ad": lambda: ('ect', 'movement'),
-            "ad_ap": lambda: ('ect', 'movement'),
-            "ap": lambda: ('ect', 'movement'),
+            "ad": lambda: ('esketamine', 'movement'),
+            "ad_ap": lambda: ('esketamine', 'movement'),
+            "ap": lambda: ('esketamine', 'movement'),
+            "esketamine": lambda: ('ect', 'movement'),
             "ect": lambda: ('ad', 'movement'),
             "remission": lambda: ('stay', 'stay'),
             "relapse": lambda: ('intake', 'movement')
         }
 
-         # DM_TRD Parameters
+        # DM_TRD Parameters
         trd_parameters = ["episode_duration", "symptom_severity", "functional_impairment", "treatment_failures"]
         self.episode_duration = episode_duration
         self.symptom_severity = symptom_severity

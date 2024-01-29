@@ -25,7 +25,7 @@ upper_bound_estimate_treatment = upper_bound_estimate_depression
 lower_bound_mdd_proportion = 0.30
 upper_bound_mdd_proportion = 0.40
 
-# Calculating the proportion of TRD patients among all depression patients
+# calculating the proportion of TRD patients among all depression patients
 lower_bound_trd_proportion = lower_bound_mdd_proportion
 upper_bound_trd_proportion = upper_bound_mdd_proportion
 

@@ -12,7 +12,7 @@ class TreeEngine:
         self.leaf_template = leaf_template
         self.decision_map = read_config(decision_map_path)
 
-        config_path = "../../config/agent_params.json"
+        config_path = "config/agent_params.json"
         self.leaves = [Leaf(config_path, current_node_slug="intake") for _ in range(leaf_count)]
         self.end_nodes_count = {}
 

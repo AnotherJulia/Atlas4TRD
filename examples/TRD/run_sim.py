@@ -1,5 +1,6 @@
 from core import Environment, Factory
 from examples.TRD.patient import Patient
+from examples.TRD.patient_esk import PatientEsk
 from utilities import Capacity
 
 
@@ -28,8 +29,17 @@ def run_simulation(simulation_id, config, cap_dist, simulation_instances=None):
     for step in config['steps']:
         for connection in step.get('connections', []):
             env.create_connection(start_slug=step['slug'], end_slug=connection)
+    
+    is_esketamine_there = False
+    for bubble in env.bubbles:
+        if bubble.slug == "esketamine":
+            is_esketamine_there = True
 
-    factory = Factory(config=config['agent_config'], agent_class_type=Patient)
+    if is_esketamine_there:
+        factory = Factory(config=config['agent_config'], agent_class_type=PatientEsk)
+    else:
+        factory = Factory(config=config['agent_config'], agent_class_type=Patient)
+
     env.connect_factory(factory)
 
     # setup initial patients

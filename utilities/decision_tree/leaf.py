@@ -60,7 +60,7 @@ class Leaf:
         self.treatment_failures = self._choose_randomly(treatment_failures_options, self.treatment_failures_dist)
 
     def calculate_madrs_score(self):
-        scoring_method = read_config("../../config/dm_trd_scoring.json")
+        scoring_method = read_config("config/dm_trd_scoring.json")
         patient_score = 0
 
         # Calculate the score based on different attributes

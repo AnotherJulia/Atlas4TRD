@@ -31,7 +31,7 @@ class SimAnalyzer:
    
         for index,_ in enumerate(self.simulation_instances):
     
-            outcomes = self.run_analysis(run_id=index, plot=False)
+            outcomes = self.run_analysis(run_id=index, plot=plot)
             n_patients.append(self.simulation_instances[index].retrieve_n_patients())
             waiting_times.append(outcomes.waiting_time)
             n_relapse.append(outcomes.n_relapse)
