@@ -13,9 +13,9 @@
     {"start_slug": "relapse", "end_slug": "intake"}
   ],
   "steps": [
-    {"slug": "ad", "description": "AD Treatment, 4wks", "capacity_ratio": 0.4, "config": "config/ad_config.json", "depth": 1, "connections": ["remission", "esketamine"]},
-    {"slug": "ap", "description": "AP treatment, 4wks", "capacity_ratio": 0.3, "config": "config/ap_config.json", "depth": 1, "connections": ["remission", "esketamine"]},
-    {"slug": "ad_ap", "description": "AP+AD treatment, 4wks", "capacity_ratio": 0.2, "config": "config/ad_ap_config.json", "depth": 1, "connections": ["remission", "esketamine"]},
+    {"slug": "ad", "description": "AD Treatment, 4wks", "capacity_ratio": 0.4, "config": "config/ad_config.json", "depth": 1, "connections": ["remission", "ect"]},
+    {"slug": "ap", "description": "AP treatment, 4wks", "capacity_ratio": 0.3, "config": "config/ap_config.json", "depth": 1, "connections": ["remission", "ect"]},
+    {"slug": "ad_ap", "description": "AP+AD treatment, 4wks", "capacity_ratio": 0.2, "config": "config/ad_ap_config.json", "depth": 1, "connections": ["remission", "ect"]},
     {"slug": "ect", "description": "ECT Treatment, 4 wks", "capacity_ratio": 0.1, "config": "config/ect_config.json", "depth": 3, "connections": ["remission", "ad"]}
   ],
   "initial_agents": {

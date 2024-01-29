@@ -23,7 +23,7 @@
     "intake": 1000
   },
   "patient_rate": 1,
-  "simulation_duration": 700,
+  "simulation_duration": 5000,
   "agent_config": "config/agent_params.json",
   "event_dict_slug": {}
 }

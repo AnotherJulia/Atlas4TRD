@@ -4,9 +4,7 @@ from examples.TRD.patient_esk import PatientEsk
 from utilities import Capacity
 
 
-def run_simulation(simulation_id, config, cap_dist, simulation_instances=None):
-    if simulation_instances is None:
-        simulation_instances = []
+def run_simulation(simulation_id, config, cap_dist):
 
     env = Environment(time=0, dt=1)
 
@@ -16,6 +14,9 @@ def run_simulation(simulation_id, config, cap_dist, simulation_instances=None):
 
     # steps
     capacity = Capacity(cap_dist)
+    if simulation_id == 0:
+        print(f"{capacity}")
+
     for step in config['steps']:
         step['capacity'] = capacity.retrieve_capacity(step['slug'])
         env.create_step(**{k: step[k] for k in ['slug', 'description', 'capacity', 'config', 'depth']}, env=env)
@@ -51,5 +52,4 @@ def run_simulation(simulation_id, config, cap_dist, simulation_instances=None):
 
     from core import SimulationInstance
     instance = SimulationInstance(run_id=simulation_id, agents=env.agents,run_data=env.data)
-    simulation_instances.append(instance)
-
+    return instance

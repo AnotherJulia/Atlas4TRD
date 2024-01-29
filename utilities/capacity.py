@@ -19,8 +19,6 @@ class Capacity:
             raise ValueError(f"ValueError: Unable to retrieve capacity for {slug}; slug not found")
 
     def assign_updated_capacity(self):
-        print("Assigning Capacities")
-
         # Validate that "total" is present in capacities_distribution
         if "total" not in self.capacities_distribution:
             raise ValueError("No total capacity provided.")
