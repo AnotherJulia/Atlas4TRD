@@ -13,7 +13,7 @@ class Bubble:
         self.current_agents = []
         self.connections = []
 
-    def __str__(self):
+    def __repr__(self):
         return f"Bubble: {self.slug} - {self.description}"
 
     def update(self):

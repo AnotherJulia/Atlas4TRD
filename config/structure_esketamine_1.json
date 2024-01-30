@@ -20,10 +20,10 @@
     {"slug": "ect", "description": "ECT Treatment, 4 wks", "capacity_ratio": 0.1, "config": "config/ect_config.json", "depth": 3, "connections": ["remission", "ad"]}
   ],
   "initial_agents": {
-    "intake": 1000
+    "intake": 1156
   },
   "patient_rate": 1,
-  "simulation_duration": 700,
+  "simulation_duration": 750,
   "agent_config": "config/agent_params.json",
   "event_dict_slug": {}
 }

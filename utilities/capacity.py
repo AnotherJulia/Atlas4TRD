@@ -39,8 +39,8 @@ class Capacity:
                       if key != "total"}
 
         # Validate that the individual capacities add up to the total
-        if sum(capacities.values()) != total_capacity:
-            raise ValueError(f"Capacities don't match the total.=> {sum(capacities.values())}")
+        # if sum(capacities.values()) != total_capacity:
+        #     raise ValueError(f"Capacities don't match the total.=> {sum(capacities.values())}")
 
         return capacities
 

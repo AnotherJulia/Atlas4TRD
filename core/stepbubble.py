@@ -23,7 +23,7 @@ class StepBubble(Bubble):
         self.mean_delta_madrs = self.treatment_parameters['mean_delta_madrs']
         self.sd_delta_madrs = self.treatment_parameters['sd_delta_madrs']
 
-    def __str__(self):
+    def __repr__(self):
         return f"Bubble: {self.slug} - {self.description} | {self.get_occupancy()}/{self.capacity} | Waiting: {self.get_waiting()}"
 
     def update(self):
