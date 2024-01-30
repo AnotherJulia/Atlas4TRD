@@ -3,7 +3,6 @@ import random
 from core.agent import Agent
 
 
-
 class PatientEsk(Agent):
 
     def __init__(self, environment, initial_bubble, episode_duration, symptom_severity, functional_impairment,
@@ -37,11 +36,18 @@ class PatientEsk(Agent):
         self.functional_impairment = functional_impairment # not used, not tracked
         self.treatment_failures = treatment_failures # not used, not tracked
 
-        if self.functional_impairment == "mild":
-            self.employed = True
-        else:
-            self.employed = False
+        self.employed = determine_employment(self.functional_impairment, self.symptom_severity)
 
     def __str__(self):
         return (f'{self.id} @ {self.current_bubble} | Episode: {self.episode_duration} '
                 f'Symptom Severity: {self.symptom_severity} w/ Psychosis: {self.psychosis}')
+
+    def update(self):
+        self.employed = determine_employment(self.functional_impairment, self.symptom_severity)
+
+def determine_employment(func_impairment, symptom_severity):
+    # A patient is not employed if they have severe functional impairment or severe symptom severity
+    if func_impairment == "severe" or symptom_severity == "severe" or func_impairment == "moderate":
+        return False
+    # In all other cases, the patient is employed
+    return True

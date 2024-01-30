@@ -3,7 +3,6 @@ import random
 from core.agent import Agent
 
 
-
 class Patient(Agent):
 
     def __init__(self, environment, initial_bubble, episode_duration, symptom_severity, functional_impairment,
@@ -22,8 +21,8 @@ class Patient(Agent):
             "relapse": lambda: ('intake', 'movement')
         }
 
-         # DM_TRD Parameters
-        trd_parameters = ["episode_duration", "symptom_severity", "functional_impairment", "treatment_failures"]
+        # DM_TRD Parameters
+        # trd_parameters = ["episode_duration", "symptom_severity", "functional_impairment", "treatment_failures"]
         self.episode_duration = episode_duration
         self.symptom_severity = symptom_severity
 
@@ -37,9 +36,13 @@ class Patient(Agent):
         self.treatment_failures = treatment_failures # not used, not tracked
 
         self.employed = determine_employment(self.functional_impairment, self.symptom_severity)
+
     def __str__(self):
         return (f'{self.id} @ {self.current_bubble} | Episode: {self.episode_duration} '
                 f'Symptom Severity: {self.symptom_severity} w/ Psychosis: {self.psychosis}')
+
+    def update(self):
+        self.employed = determine_employment(self.functional_impairment, self.symptom_severity)
 
 
 def determine_employment(func_impairment, symptom_severity):

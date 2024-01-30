@@ -50,6 +50,7 @@ class TreatmentEvent(Event):
             raise ValueError(f"No bubble found with slug '{next_bubble_slug}'")
 
         self.agent.add_to_medical_history(event_type="treatment_end", event_data=event_data, time=event_time)
+        self.agent.update()  # update the patients employment state # todo: implement change in func. impairment
         self.schedule_movement_event(next_bubble, event_time, environment)
 
     @staticmethod

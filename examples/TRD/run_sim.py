@@ -4,7 +4,7 @@ from examples.TRD.patient_esk import PatientEsk
 from utilities import Capacity
 
 
-def run_simulation(simulation_id, config, cap_dist):
+def run_simulation(simulation_id, config, cap_dist, simulation_duration):
     
     env = Environment(time=0, dt=1)
 
@@ -48,7 +48,7 @@ def run_simulation(simulation_id, config, cap_dist):
         env.create_agent(agent, count)
 
     env.set_patient_rate(config['patient_rate'])
-    env.run(until=config['simulation_duration'], verbose=False)
+    env.run(until=simulation_duration, verbose=False)
 
     from core import SimulationInstance
     instance = SimulationInstance(run_id=simulation_id, agents=env.agents,run_data=env.data)

@@ -1,4 +1,5 @@
-{
+{ 
+  "name": "Default",
   "total_capacity": 50,
   "states": [
     {"slug": "intake", "description": "Patients coming into the TRD care pathway", "depth": 0, "connections": ["ad", "ap", "ad_ap"]},

@@ -1,4 +1,5 @@
 {
+  "name": "Esketamine",
   "total_capacity": 50,
   "states": [
     {"slug": "intake", "description": "Patients coming into the TRD care pathway", "depth": 0, "connections": ["ad", "ap", "ad_ap"]},
@@ -13,11 +14,11 @@
     {"start_slug": "relapse", "end_slug": "intake"}
   ],
   "steps": [
-    {"slug": "ad", "description": "AD Treatment, 4wks", "capacity_ratio": 0.5, "config": "config/ad_config.json", "depth": 1, "connections": ["remission", "esketamine"]},
-    {"slug": "ap", "description": "AP treatment, 4wks", "capacity_ratio": 0.15, "config": "config/ap_config.json", "depth": 1, "connections": ["remission", "esketamine"]},
-    {"slug": "ad_ap", "description": "AP+AD treatment, 4wks", "capacity_ratio": 0.25, "config": "config/ad_ap_config.json", "depth": 1, "connections": ["remission", "esketamine"]},
-    {"slug": "esketamine", "description": "Esketamine treatment, 4wks", "capacity_ratio": 0.4, "config": "config/esketamine_config.json", "depth": 2, "connections": ["ect"]},
-    {"slug": "ect", "description": "ECT Treatment, 4 wks", "capacity_ratio": 0.05, "config": "config/ect_config.json", "depth": 3, "connections": ["remission", "ad"]}
+    {"slug": "ad", "description": "AD Treatment, 4wks", "capacity_ratio": 0.3, "config": "config/ad_config.json", "depth": 1, "connections": ["remission", "esketamine"]},
+    {"slug": "ap", "description": "AP treatment, 4wks", "capacity_ratio": 0.3, "config": "config/ap_config.json", "depth": 1, "connections": ["remission", "esketamine"]},
+    {"slug": "ad_ap", "description": "AP+AD treatment, 4wks", "capacity_ratio": 0.2, "config": "config/ad_ap_config.json", "depth": 1, "connections": ["remission", "esketamine"]},
+    {"slug": "esketamine", "description": "Esketamine treatment, 8wks", "capacity_ratio": 0.0, "config": "config/esketamine_config.json", "depth": 2, "connections": ["ect"]},
+    {"slug": "ect", "description": "ECT Treatment, 4 wks", "capacity_ratio": 0.1, "config": "config/ect_config.json", "depth": 3, "connections": ["remission", "ad"]}
   ],
   "initial_agents": {
     "intake": 1156
