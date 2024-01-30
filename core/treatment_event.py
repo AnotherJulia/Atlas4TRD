@@ -25,20 +25,18 @@ class TreatmentEvent(Event):
             self.treatment_bubble.response_rate,
             self.treatment_bubble.relapse_rate
         )
-
-        if random.random() < remission_chance:
-            # Agent goes into remission
+        
+        event_data["relapse_rate"] = relapse_chance
+   
+        random_number = random.random()
+        if random_number < remission_chance:
             next_bubble_slug = "remission"
             event_data["state"] = "remission"
-
-        elif random.random() < response_chance:
-            # Agent responds but doesn't go into remission, tries same treatment again
+        elif random_number < response_chance:
             event_data["state"] = "response"
             self.schedule_treatment_event(event_time, environment)
             return
-
         else:
-            # Agent doesn't respond, needs new treatment
             event_data["state"] = "no_response"
             next_bubble_slug, _ = self.agent.decide_next_event()
 

@@ -39,48 +39,63 @@ class MovementEvent(Event):
                 self.agent.decide_and_schedule_next_event()
 
             elif self.end_bubble.slug == "remission":
+                
+                # Instead use Tom's system (inefficiency 101)
 
-                # With some probability, the patient can relapse
-                if np.random.random() < self.start_bubble.relapse_rate:
-                    next_step_bubble = next(bubble for bubble in environment.bubbles if bubble.slug == "relapse")
+                precomputed_probs = [self.end_bubble.phq_analyzer.get_prob_at_time(t, p=self.start_bubble.relapse_rate, type="maintenance") for t in range(0, 25)]
 
-                    time_until_relapse = self.end_bubble.phq_analyzer.time_to_relapse("maintenance")
-                    if time_until_relapse > 24:
-                        recovery = next(bubble for bubble in environment.bubbles if bubble.slug == "recovery")
-                        movement_event = MovementEvent(self.time + 24, self.agent, self.end_bubble,
-                                                       recovery)
+                for t, prob in enumerate(precomputed_probs):
+                    # prob = self.end_bubble.phq_analyzer.get_prob_at_time(t, p=self.start_bubble.relapse_rate, type="maintenance")
+                    if prob < np.random.random():
+                        relapse = next(bubble for bubble in environment.bubbles if bubble.slug == "relapse")
+                        movement_event = MovementEvent(self.time + t, self.agent, self.end_bubble, relapse)
+                        break
 
-                    else:
-                        movement_event = MovementEvent(self.time + time_until_relapse, self.agent, self.end_bubble,
-                                                       next_step_bubble)
-
-                # if patient doesn't relapse, then they go to recovery after 6 months!
-                else:
-                    recovery = next(bubble for bubble in environment.bubbles if bubble.slug == "recovery")
-
-                    event_data = {
+                event_data = {
                         "state": "recovery"
                     }
 
-                    self.agent.add_to_medical_history(event_type="movement_event", event_data=event_data,
+                self.agent.add_to_medical_history(event_type="movement_event", event_data=event_data,
                                                       time=self.time)
 
-                    movement_event = MovementEvent(self.time + 24, self.agent, self.end_bubble,
-                                                   recovery)
+                recovery = next(bubble for bubble in environment.bubbles if bubble.slug == "recovery")
+                movement_event = MovementEvent(self.time + 24, self.agent, self.end_bubble, recovery)
+
                 environment.schedule_event(movement_event)
 
+
             elif self.end_bubble.slug == "recovery":
+                 
+                relapse_rate = 0.3
 
-                time_until_relapse = self.end_bubble.phq_analyzer.time_to_relapse("discontinued")
-                relapse_chance = (np.sum(self.end_bubble.phq_analyzer.interval_probs_discontinued))
+                for event in reversed(self.agent.medical_history):
+                    if event["type"] == "treatment_end":
+                        relapse_rate = event['data'].get('relapse_rate')
+                        break
 
-                if np.random.random() < relapse_chance:
-                    relapse = next(bubble for bubble in environment.bubbles if bubble.slug == "relapse")
-                    movement_event = MovementEvent(self.time + time_until_relapse, self.agent, self.end_bubble,
-                                                   relapse)
-                    environment.schedule_event(movement_event)
+                if relapse_rate is None:
+                    raise ValueError(f"No Last treatment bubble found")
 
-                # otherwise we just stay here! patient recovers
+                precomputed_probs = [self.end_bubble.phq_analyzer.get_prob_at_time(t, p=relapse_rate, type="discontinued") for t in range(0, 25)]
+
+                for t, prob in enumerate(precomputed_probs):
+                    # prob = self.end_bubble.phq_analyzer.get_prob_at_time(t, p=0.3, type="maintenance")
+                    if prob < np.random.random():
+                        relapse = next(bubble for bubble in environment.bubbles if bubble.slug == "relapse")
+                        movement_event = MovementEvent(self.time + t, self.agent, self.end_bubble, relapse)
+                        break
+
+                event_data = {
+                        "state": "recovery"
+                    }
+
+                self.agent.add_to_medical_history(event_type="movement_event", event_data=event_data,
+                                                      time=self.time)
+
+                recovery = next(bubble for bubble in environment.bubbles if bubble.slug == "recovery")
+                movement_event = MovementEvent(self.time + 24, self.agent, self.end_bubble, recovery)
+
+                environment.schedule_event(movement_event)
 
             elif self.end_bubble.slug == "relapse":
                 # Schedule a movement event back to intake

@@ -5,7 +5,7 @@ from utilities import Capacity
 
 
 def run_simulation(simulation_id, config, cap_dist):
-
+    
     env = Environment(time=0, dt=1)
 
     # states
@@ -14,8 +14,8 @@ def run_simulation(simulation_id, config, cap_dist):
 
     # steps
     capacity = Capacity(cap_dist)
-    if simulation_id == 0:
-        print(f"{capacity}")
+    # if simulation_id == 0:
+    #     print(f"{capacity}")
 
     for step in config['steps']:
         step['capacity'] = capacity.retrieve_capacity(step['slug'])

@@ -13,7 +13,7 @@ class PatientEsk(Agent):
 
         # Set up the decision-making choices
         self.event_slug_dict = {
-            "intake": lambda: (random.choices(["ad", "ad_ap", "ap"], weights=[0.60, 0.34, 0.06])[0], 'movement'),
+            "intake": lambda: (random.choices(["ad", "ad_ap", "ap"], weights=[0.60, 0.35, 0.05])[0], 'movement'),
             "ad": lambda: ('esketamine', 'movement'),
             "ad_ap": lambda: ('esketamine', 'movement'),
             "ap": lambda: ('esketamine', 'movement'),

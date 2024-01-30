@@ -28,7 +28,7 @@ def run_simulation_w_config(config_path, esketamine_fraction):
 
     capacity_distribution = capacity_allocation(config_cap, esketamine_fraction=esketamine_fraction)
     capacity_distribution['total'] = config['total_capacity']
-    print(capacity_distribution)
+    # print(capacity_distribution)
 
 
     for index in range(num_sims):

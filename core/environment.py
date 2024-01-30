@@ -17,7 +17,8 @@ class Environment:
         self.data = {
             "time": [],
             "bubble_occupancies": {},
-            "waiting_list": {}
+            "waiting_list": {},
+            "num_agents": []
         }
 
     def run(self, until, verbose=False):
@@ -100,6 +101,8 @@ class Environment:
 
     def collect_data(self):
         self.data['time'].append(self.time)
+        self.data["num_agents"].append(len(self.agents))
+
         for bubble in self.bubbles:
             occupancy = bubble.get_occupancy()
             waiting = bubble.get_waiting()

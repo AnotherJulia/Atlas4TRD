@@ -4,6 +4,9 @@ from scipy.stats import norm
 from scipy.interpolate import interp1d
 from scipy.optimize import curve_fit
 
+from functools import lru_cache
+
+
 
 class PHQ9Analysis:
     def __init__(self):
@@ -194,7 +197,8 @@ class PHQ9Analysis:
         interpolated_values /= interpolated_values.sum()
 
         return interpolated_values
-    
+
+
     # @TOM HERE IS THE FUNCTION TO USE
     '''
     t: time to calculate
@@ -202,26 +206,53 @@ class PHQ9Analysis:
 
     output: probability to relapse at time t
     '''
+    # def get_prob_at_time(self, t, type="maintenance", p=0.3):
+    #     intervals = self.return_probability_intervals(group_type=type)
+    #     interpolated_values = self.interpolate_probability_intervals(intervals)
+
+    #     return interpolated_values[t]*p
+
+    @lru_cache(maxsize=None)  # Cache results of this method
     def get_prob_at_time(self, t, type="maintenance", p=0.3):
         intervals = self.return_probability_intervals(group_type=type)
-        interpolated_values = self.interpolate_probability_intervals(intervals)
+        if not hasattr(self, 'cached_interpolated_values'):
+            self.cached_interpolated_values = {}
+        if type not in self.cached_interpolated_values:
+            self.cached_interpolated_values[type] = self.interpolate_probability_intervals(intervals)
+        interpolated_values = self.cached_interpolated_values[type]
 
-        return interpolated_values[t]*p
-
-    def time_to_relapse(self, group_type="maintenance"):
-        # Get the relapse probability intervals
-        interval_probs = np.array(self.return_probability_intervals(group_type=group_type))
-
-        # Transform these from interval probabilities to a cumulative distribution
-        cumulative_probs = np.cumsum(interval_probs)
-
-        # Draw a random number between 0 and 1
+        return interpolated_values[t] * p
+        
+    def time_to_relapse(self, group_type="maintenance", p=0.3):
+        # Get the relapse probability intervals for the specified group
+        interval_probs = self.return_probability_intervals(group_type=group_type)
+    
+        # Interpolate these probabilities to get a continuous function over time
+        interpolated_values = self.interpolate_probability_intervals(interval_probs)
+    
+        # Scale the interpolated probabilities by the general probability factor p
+        adjusted_probs = interpolated_values * p
+    
+        # Generate a cumulative distribution from these adjusted probabilities
+        cumulative_probs = np.cumsum(adjusted_probs)
+    
+        # Ensure the cumulative probabilities are capped at 1
+        cumulative_probs = np.clip(cumulative_probs, 0, 1)
+    
+        # Draw a random number between 0 and 1 to simulate the occurrence of a relapse
         random_prob = np.random.random()
+    
+        # Find the first time point where the cumulative probability exceeds the random probability
+        relapse_time_index = np.searchsorted(cumulative_probs, random_prob)
+    
+        # Ensure the index does not exceed the maximum time index
+        relapse_time_index = min(relapse_time_index, len(cumulative_probs) - 1)
+    
+        # Convert the index to the corresponding time
+        relapse_time = relapse_time_index  # Assuming each index corresponds to one time unit
 
-        # Find the week this number lands at in the cumulative distribution
-        relapse_week = np.searchsorted(cumulative_probs, random_prob)
+        return relapse_time
 
-        return relapse_week
 
     def plot_interpolated_probability_intervals(self, interval):
         # Get the interpolated probabilities

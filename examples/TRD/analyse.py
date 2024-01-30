@@ -7,10 +7,11 @@ def analyse_instances(simulation_instances):
     print("----------------------")
     
     calculate_parameters(simulation_instances)
-
+    
+    # analyse_remission(simulation_instances)
     analyse_recovery(simulation_instances)
     analyse_recovery_percentages(simulation_instances)
-    # analyse_waiting_list(simulation_instances)
+    analyse_waiting_list(simulation_instances)
     # analyse_waiting_list_compare_bubbles(simulation_instances)
 
     pass
@@ -55,6 +56,45 @@ def analyse_recovery(simulation_instances):
     plt.legend()
     plt.show()
 
+def analyse_remission(simulation_instances):
+    remission = {}
+
+    all_times = []  # This will collect all time arrays to find the maximum length if they differ
+
+    for name, instances in simulation_instances.items():
+        all_occupations = []  # Collect all occupations for this name to compute the average later
+        for instance in instances:
+            time_data = instance.run_data["time"]
+            all_times.append(time_data)  # Collect all time data
+            all_occupations.append(instance.run_data["bubble_occupancies"]["remission"])
+
+        # Ensure all occupation arrays are the same length before averaging
+        max_length = max(len(occ) for occ in all_occupations)
+        padded_occupations = [np.pad(occ, (0, max_length - len(occ)), 'constant', constant_values=(0)) for occ in all_occupations]
+        
+        # Compute the average occupation for each time point
+        average_occupation = np.mean(padded_occupations, axis=0)
+        remission[name] = average_occupation
+
+    # Determine the longest time array if they vary
+    if not all_times:
+        time = np.arange(0, 53, 1)
+    else:
+        max_length_time = max(len(time) for time in all_times)
+        time = np.arange(0, max_length_time, 1)
+
+    plt.figure(figsize=(10, 6))
+    for name, occupation in remission.items():
+        # Ensure the occupation array matches the length of the time array
+        if len(occupation) < len(time):
+            occupation = np.pad(occupation, (0, len(time) - len(occupation)), 'constant', constant_values=(0))
+        plt.plot(time, occupation, label=name)
+
+    plt.xlabel("Time in weeks")
+    plt.ylabel("Number of patients")
+    plt.title("Average number of patients in remission")
+    plt.legend()
+    plt.show()
 
 def analyse_recovery_percentages(simulation_instances):
     recovery_rates = {}  # Dictionary for average recovery rates for all cases
@@ -103,15 +143,15 @@ def analyse_recovery_percentages(simulation_instances):
         print(f"Case: {case} | Recovery: {mean_rates*100}%")
 
     # Plot total occupancies including waiting lists
-    plt.figure(figsize=(10, 6))
-    for case, occupancies in total_occupancies_dict.items():
-        plt.plot(time, occupancies, label=case)
-    plt.xlabel('Time')
-    plt.ylabel('Total Occupancies Including Waiting Lists')
-    plt.title('Total Occupancies Over Time by Case Including Waiting Lists')
-    plt.legend()
-    plt.grid(True)
-    plt.show()
+    # plt.figure(figsize=(10, 6))
+    # for case, occupancies in total_occupancies_dict.items():
+    #     plt.plot(time, occupancies, label=case)
+    # plt.xlabel('Time')
+    # plt.ylabel('Total Occupancies Including Waiting Lists')
+    # plt.title('Total Occupancies Over Time by Case Including Waiting Lists')
+    # plt.legend()
+    # plt.grid(True)
+    # plt.show()
 
     # Plot recovery rates
     plt.figure(figsize=(10, 6))
@@ -123,6 +163,81 @@ def analyse_recovery_percentages(simulation_instances):
     plt.legend()
     plt.ylim(0, 1)
     plt.show()
+
+
+# def analyse_recovery_percentages(simulation_instances):
+#     recovery_rates = {}  # Dictionary for average recovery rates for all cases
+#     total_occupancies_dict = {}  # Dictionary for total occupancies including waiting lists
+#     all_times = []
+
+#     # Gather all time points
+#     for case, instances in simulation_instances.items():
+#         for instance in instances:
+#             time_data = instance.run_data["time"]
+#             all_times.extend(time_data)
+
+#     # Determine the longest time series
+#     max_time = max(all_times) if all_times else 53  # Default to 53 if no time data
+#     time = np.arange(0, max_time + 1, 1)
+
+#     for case, instances in simulation_instances.items():
+#         case_recovery_rates = []
+#         case_total_occupancies = []
+
+#         for instance in instances:
+#             occupancies = instance.run_data["bubble_occupancies"]
+
+#             waiting_lists = instance.run_data["waiting_list"]
+#             recovery_occupancies = occupancies.get("recovery", [0] * len(time))
+#             # num_agents = instance.run_data["num_agents"]
+
+#             # Combine occupancies and waiting list sizes for total occupancies
+#             combined_total_occupancies = []
+#             for t in range(len(time)):
+#                 total_at_t = sum(occupancies.get(bubble, [0] * len(time))[t] for bubble in occupancies)
+#                 waiting_list_at_t = sum(waiting_lists.get(bubble, [0] * len(time))[t] for bubble in waiting_lists)
+#                 combined_total_occupancies.append(total_at_t + waiting_list_at_t)
+
+#             case_total_occupancies.append(combined_total_occupancies)
+#             
+#             recovery_rate = []
+#             for t in time:
+#                 rec_rate_at_t = occupancies['recovery'][t] / num_agents[t]
+#                 recovery_rate.append(rec_rate_at_t)
+
+#             case_recovery_rates.append(recovery_rate)
+
+#         recovery_rates[case] = np.mean(case_recovery_rates, axis=0).tolist()
+#         total_occupancies_dict[case] = np.mean(case_total_occupancies, axis=0).tolist()
+#     
+#     rec_rates = []
+#     for case, rates in recovery_rates.items():
+#         mean_rates = np.mean(rates)
+#         rec_rates.append(mean_rates)
+
+#         print(f"Case: {case} | Recovery: {mean_rates*100}%")
+
+#     # Plot total occupancies including waiting lists
+#     plt.figure(figsize=(10, 6))
+#     for case, occupancies in total_occupancies_dict.items():
+#         plt.plot(time, occupancies, label=case)
+#     plt.xlabel('Time')
+#     plt.ylabel('Total Occupancies Including Waiting Lists')
+#     plt.title('Total Occupancies Over Time by Case Including Waiting Lists')
+#     plt.legend()
+#     plt.grid(True)
+#     plt.show()
+
+#     # Plot recovery rates
+#     plt.figure(figsize=(10, 6))
+#     for case, rates in recovery_rates.items():
+#         plt.plot(time, rates, label=case)
+#     plt.xlabel('Time')
+#     plt.ylabel('Recovery Rate')
+#     plt.title('Recovery Rates Over Time')
+#     plt.legend()
+#     plt.ylim(0, 1)
+#     plt.show()
 
 
 

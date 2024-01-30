@@ -18,7 +18,7 @@
       "antidepressant": 0.4,
       "antidepressant_antipsychotic": 0.2,
       "antipsychotic": 0.15,
-      "esketamine": 0.0,
+      "esketamine": 0.2,
       "ect": 0.05
    },
    "treatment_properties":{
