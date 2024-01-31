@@ -17,7 +17,7 @@ class Patient(Agent):
             "ad_ap": lambda: ('ect', 'movement'),
             "ap": lambda: ('ect', 'movement'),
             "ect": lambda: ('ad', 'movement'),
-            "remission": lambda: ('stay', 'stay'),
+            "remission": lambda: ('recovery', 'stay'),
             "relapse": lambda: ('intake', 'movement')
         }
 

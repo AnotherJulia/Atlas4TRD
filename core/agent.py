@@ -56,7 +56,6 @@ class Agent:
         self.environment.schedule_event(movement_event)
 
     def decide_next_event(self):
-
         decision = self.event_slug_dict[self.current_bubble.slug]()
         # print(f"Person {self.id} decided on next event: {decision}")
         return decision

@@ -1,5 +1,6 @@
 from core import Event
 import numpy as np
+import random
 
 
 class MovementEvent(Event):
@@ -18,6 +19,7 @@ class MovementEvent(Event):
         if self.agent.current_bubble != self.start_bubble:
             raise ValueError(f"Agent {self.agent.id} is not in the expected start bubble. "
                              f"Start {self.start_bubble.slug} | Current {self.agent.current_bubble.slug}")
+            return 
 
         # Move the agent from start to end bubble
         self.start_bubble.remove_agent(self.agent)
@@ -26,6 +28,7 @@ class MovementEvent(Event):
 
         # Handling different types of StateBubble
         if isinstance(self.end_bubble, StateBubble):
+            
             if self.end_bubble.slug == "intake":
                 # Determine the next step for the agent
 
@@ -35,37 +38,34 @@ class MovementEvent(Event):
                 }
 
                 self.agent.add_to_medical_history(event_type="movement_event", event_data=event_data, time=self.time)
-
                 self.agent.decide_and_schedule_next_event()
 
             elif self.end_bubble.slug == "remission":
                 
-                # Instead use Tom's system (inefficiency 101)
-
                 precomputed_probs = [self.end_bubble.phq_analyzer.get_prob_at_time(t, p=self.start_bubble.relapse_rate, type="maintenance") for t in range(0, 25)]
 
                 for t, prob in enumerate(precomputed_probs):
+        
                     # prob = self.end_bubble.phq_analyzer.get_prob_at_time(t, p=self.start_bubble.relapse_rate, type="maintenance")
-                    if prob < np.random.random():
+                    if random.random() < prob:
                         relapse = next(bubble for bubble in environment.bubbles if bubble.slug == "relapse")
                         movement_event = MovementEvent(self.time + t, self.agent, self.end_bubble, relapse)
-                        break
+                        environment.schedule_event(movement_event)
+                        return
 
                 event_data = {
                         "state": "recovery"
-                    }
+                }
 
                 self.agent.add_to_medical_history(event_type="movement_event", event_data=event_data,
                                                       time=self.time)
 
                 recovery = next(bubble for bubble in environment.bubbles if bubble.slug == "recovery")
                 movement_event = MovementEvent(self.time + 24, self.agent, self.end_bubble, recovery)
-
                 environment.schedule_event(movement_event)
 
-
             elif self.end_bubble.slug == "recovery":
-                 
+
                 relapse_rate = 0.3
 
                 for event in reversed(self.agent.medical_history):
@@ -76,26 +76,26 @@ class MovementEvent(Event):
                 if relapse_rate is None:
                     raise ValueError(f"No Last treatment bubble found")
 
-                precomputed_probs = [self.end_bubble.phq_analyzer.get_prob_at_time(t, p=relapse_rate, type="discontinued") for t in range(0, 25)]
+                precomputed_probs = [self.end_bubble.phq_analyzer.get_prob_at_time(t, p=relapse_rate, type="discontinued") for t in range(0, 50)]
 
                 for t, prob in enumerate(precomputed_probs):
-                    # prob = self.end_bubble.phq_analyzer.get_prob_at_time(t, p=0.3, type="maintenance")
-                    if prob < np.random.random():
+                    if random.random() < prob:
                         relapse = next(bubble for bubble in environment.bubbles if bubble.slug == "relapse")
                         movement_event = MovementEvent(self.time + t, self.agent, self.end_bubble, relapse)
-                        break
+                        # environment.schedule_event(movement_event)
+                        return
 
-                event_data = {
-                        "state": "recovery"
-                    }
+                # event_data = {
+                #         "state": "recovery"
+                #     }
 
-                self.agent.add_to_medical_history(event_type="movement_event", event_data=event_data,
-                                                      time=self.time)
+                # self.agent.add_to_medical_history(event_type="movement_event", event_data=event_data,
+                #                                       time=self.time)
 
-                recovery = next(bubble for bubble in environment.bubbles if bubble.slug == "recovery")
-                movement_event = MovementEvent(self.time + 24, self.agent, self.end_bubble, recovery)
+                # recovery = next(bubble for bubble in environment.bubbles if bubble.slug == "recovery")
+                # movement_event = MovementEvent(self.time + 24, self.agent, self.end_bubble, recovery)
 
-                environment.schedule_event(movement_event)
+                # environment.schedule_event(movement_event)
 
             elif self.end_bubble.slug == "relapse":
                 # Schedule a movement event back to intake
@@ -107,8 +107,8 @@ class MovementEvent(Event):
 
                 self.agent.add_to_medical_history(event_type="relapse", event_data=event_data, time=self.time)
 
-                next_bubble = next(bubble for bubble in environment.bubbles if bubble.slug == "intake")
-                movement_event = MovementEvent(self.time + environment.dt, self.agent, self.end_bubble, next_bubble)
+                intake_bubble = next(bubble for bubble in environment.bubbles if bubble.slug == "intake")
+                movement_event = MovementEvent(self.time, self.agent, self.end_bubble, intake_bubble)
                 environment.schedule_event(movement_event)
             else:
                 raise ValueError

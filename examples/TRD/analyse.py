@@ -1,18 +1,20 @@
 import matplotlib.pyplot as plt
 import numpy as np
+from scipy import stats
 
 def analyse_instances(simulation_instances):
     print("----------------------")
     # calculate_employment_rate_by_case(simulation_instances)
     # calculate_time_in_system(simulation_instances, cr=800)
-    calculate_cost_effectiveness(simulation_instances)
-    # print("----------------------")
+    # calculate_cost_effectiveness(simulation_instances)
+    calculate_transition_rates_post_stabilization(simulation_instances)
+    print("----------------------")
 
-    analyse_aspect(simulation_instances, aspect='remission', title="Average number of patients in remission")
+    # analyse_aspect(simulation_instances, aspect='remission', title="Average number of patients in remission")
     # analyse_aspect_percentages(simulation_instances, 'remission')
 
-    analyse_aspect(simulation_instances, aspect='recovery', title="Average number of patients in recovery")
-    analyse_aspect_percentages(simulation_instances, 'recovery')
+    # analyse_aspect(simulation_instances, aspect='recovery', title="Average number of patients in recovery")
+    # analyse_aspect_percentages(simulation_instances, 'recovery')
 
     # analyse_waiting_list(simulation_instances)
 
@@ -28,42 +30,71 @@ def plot_data(time, data, title):
     plt.legend()
     plt.show()
 
-def analyse_aspect(simulation_instances, aspect, title):
+def analyse_aspect(simulation_instances, aspect, title, confidence_level=0.95, last_n_weeks=52):
     aspect_data = {}
+    aspect_cis = {}  # Store CIs for each case for all weeks
     all_times = []
+
+    print(f"--- Analyzing {title} ---")
 
     for name, instances in simulation_instances.items():
         all_occupations = []
         for instance in instances:
             time_data = instance.run_data["time"]
-            all_times.append(time_data)
+            all_times.append(time_data)  # Collect all time data for plotting
             all_occupations.append(instance.run_data["bubble_occupancies"][aspect])
 
-        max_length = max(len(occ) for occ in all_occupations)
-        padded_occupations = [np.pad(occ, (0, max_length - len(occ)), 'constant', constant_values=(0)) for occ in all_occupations]
-        average_occupation = np.mean(padded_occupations, axis=0)
-        aspect_data[name] = average_occupation
+        # Calculate mean for the entire time range
+        mean_occupation = np.mean(all_occupations, axis=0)
+        aspect_data[name] = mean_occupation
 
-    max_length_time = max(len(time) for time in all_times) if all_times else 53
+        # Calculate SEM and CI for all weeks
+        sem = stats.sem(all_occupations, axis=0, nan_policy='omit')
+        dof = len(all_occupations) - 1  # Degrees of freedom
+        t_critical = stats.t.ppf((1 + confidence_level) / 2, dof)
+        ci = t_critical * sem
+        aspect_cis[name] = ci
+
+        # Calculate and print the average aspect value and CI for the last 52 weeks
+        trimmed_mean = np.mean(mean_occupation[-last_n_weeks:])
+        trimmed_ci = np.mean(ci[-last_n_weeks:])
+        print(f"{name} - Average {aspect} over the last {last_n_weeks} weeks: {trimmed_mean:.2f} ±{trimmed_ci:.2f}")
+
+    max_length_time = max(len(time) for time in all_times)
     time = np.arange(0, max_length_time, 1)
 
-    plot_data(time, aspect_data, title)
 
-def analyse_aspect_percentages(simulation_instances, aspect):
+    # Plot data with CI fill for all weeks
+    plt.figure(figsize=(10, 6))
+    for name, occupation in aspect_data.items():
+        ci = aspect_cis[name]
+        plt.plot(time, occupation, label=name)
+        plt.fill_between(time, occupation - ci, occupation + ci, alpha=0.2)
+
+    plt.xlabel("Time in weeks")
+    plt.ylabel(f"Number of patients in {aspect}")
+    plt.title(title)
+    plt.legend()
+    plt.show()
+
+def analyse_aspect_percentages(simulation_instances, aspect, confidence_level=0.95, last_n_weeks=52):
     assert aspect in ["recovery", "remission"], "Aspect must be either 'recovery' or 'remission'"
-    
+
     aspect_rates = {}  # Dictionary for average rates for all cases
+    aspect_cis = {}  # Store CIs for each case for all weeks
     all_times = []
+
+    print(f"--- Analyzing {aspect} percentages ---")
 
     # Gather all time points
     for instances in simulation_instances.values():
         for instance in instances:
             time_data = instance.run_data["time"]
-            all_times.extend(time_data)
+            all_times.append(time_data)
 
-    # Determine the longest time series
-    max_time = max(all_times) if all_times else 52  # Default to 53 if no time data is available
-    time = np.arange(0, max_time + 1, 1)
+    # Determine the time range for the entire dataset
+    max_length_time = max(len(time) for time in all_times)
+    time = np.arange(0, max_length_time, 1)
 
     for case, instances in simulation_instances.items():
         case_aspect_rates = []
@@ -83,21 +114,34 @@ def analyse_aspect_percentages(simulation_instances, aspect):
 
             case_total_occupancies.append(combined_total_occupancies)
 
-            # Compute aspect rates
+            # Compute aspect rates for the entire time frame
             aspect_rate = np.divide(aspect_occupancies, combined_total_occupancies, out=np.zeros_like(aspect_occupancies, dtype=np.float64), where=np.array(combined_total_occupancies) > 0)
             case_aspect_rates.append(aspect_rate)
 
-        aspect_rates[case] = np.mean(case_aspect_rates, axis=0)
+        # Calculate mean rates and SEM for the entire time frame
+        mean_rates = np.mean(case_aspect_rates, axis=0)
+        sem = stats.sem(case_aspect_rates, axis=0, nan_policy='omit')
+        aspect_rates[case] = mean_rates
 
-    # Plot aspect rates
+        # Calculate CI for all weeks
+        aspect_cis[case] = sem * stats.t.ppf((1 + confidence_level) / 2, len(case_aspect_rates) - 1)
+
+        # Calculate and print the average rate and CI for the last 52 weeks
+        trimmed_mean = np.mean(mean_rates[-last_n_weeks:])
+        trimmed_ci = np.mean(aspect_cis[case][-last_n_weeks:])
+        print(f"{case} - Average {aspect} percentage for the last {last_n_weeks} weeks: {trimmed_mean * 100:.2f}% ±{trimmed_ci * 100:.2f}%")
+
+    # Plot data with CI fill for all weeks
     plt.figure(figsize=(10, 6))
     for case, rates in aspect_rates.items():
-        plt.plot(time, rates, label=case)
+        ci = aspect_cis[case]
+        plt.plot(time, rates * 100, label=case)  # Convert to percentage
+        plt.fill_between(time, (rates - ci) * 100, (rates + ci) * 100, alpha=0.2)  # Convert to percentage
+
     plt.xlabel('Time (weeks)')
-    plt.ylabel(f'{aspect.capitalize()} Rate')
-    plt.title(f'{aspect.capitalize()} Rates Over Time')
+    plt.ylabel(f'{aspect.capitalize()} Rate (%)')
+    plt.title(f'{aspect.capitalize()} Rates Over Time with CI')
     plt.legend()
-    plt.ylim(0, 1)  # Aspect rates should be between 0 and 1
     plt.show()
 
 
@@ -109,7 +153,7 @@ def analyse_waiting_list(simulation_instances):
     waiting_list_data = {case: {bubble: [] for bubble in bubbles_of_interest} for case in simulation_instances}
    
     all_times = [time for instances in simulation_instances.values() for instance in instances for time in instance.run_data["time"]]
-    max_time = max(all_times) if all_times else 53
+    max_time = max(all_times) if all_times else 52
     time_axis = np.arange(0, max_time + 1, 1)
 
     for case, instances in simulation_instances.items():
@@ -181,9 +225,85 @@ def calculate_time_in_system(simulation_instances, cr=500):
     print(f"Average time in system from t={cr} with recovery cutoff (wk): {average_time_in_system}")
 
 
-def calculate_cost_effectiveness(simulation_instances):
-    QOL_REMISSION = 0.901
-    QOL_RESPONSE = 0.673
-    QOL_NO_RESPONSE = 0.417
-    TRT = {'ad', "ap", "ad_ap", "esketamine", "ect"}
-    pass
+# def calculate_cost_effectiveness(simulation_instances):
+#     QOL_REMISSION = 0.901
+#     QOL_RESPONSE = 0.673
+#     QOL_NO_RESPONSE = 0.417
+#     TRT = {'ad', "ap", "ad_ap", "esketamine", "ect"}
+#     pass
+def calculate_transition_rates(simulation_instances):
+    remission_transitions = 0
+    recovery_transitions = 0
+    total_patients = 0
+
+    for instances in simulation_instances.values():
+        for instance in instances:
+            for agent in instance.agents:
+                total_patients += 1  # Count each patient
+                entered_remission = False
+                entered_recovery = False
+
+                for event in agent.medical_history:
+                    if event['type'] == 'treatment_end' and event['data'].get('state') == 'remission':
+                        entered_remission = True
+                    if event['type'] == 'movement_event' and event['data'].get('state') == 'recovery':
+                        entered_recovery = True
+
+                if entered_remission:
+                    remission_transitions += 1
+                if entered_recovery:
+                    recovery_transitions += 1
+
+    remission_rate = remission_transitions / total_patients if total_patients > 0 else 0
+    recovery_rate = recovery_transitions / total_patients if total_patients > 0 else 0
+
+    print(f"Remission Rate: {remission_rate:.2f}")
+    print(f"Recovery Rate: {recovery_rate:.2f}")
+
+def calculate_transition_rates_post_stabilization(simulation_instances, stabilization_time=800):
+    case_results = {}
+
+    for case_name, instances in simulation_instances.items():
+        remission_transitions = 0
+        recovery_transitions = 0
+        patients_considered = 0
+
+        for instance in instances:
+            for agent in instance.agents:
+                # Filter the medical history for events after stabilization_time
+                post_stabilization_history = [event for event in agent.medical_history if event['time'] >= stabilization_time]
+
+                if not post_stabilization_history:
+                    continue  # Skip this agent if no relevant history after stabilization
+
+                patients_considered += 1  # Count this patient as considered
+                entered_remission = False
+                entered_recovery = False
+
+                for event in post_stabilization_history:
+                    if event['type'] == 'treatment_end' and event['data'].get('state') == 'remission':
+                        entered_remission = True
+                    if event['type'] == 'movement_event' and event['data'].get('state') == 'recovery':
+                        entered_recovery = True
+
+                if entered_remission:
+                    remission_transitions += 1
+                if entered_recovery:
+                    recovery_transitions += 1
+
+        remission_rate = remission_transitions / patients_considered if patients_considered > 0 else 0
+        recovery_rate = recovery_transitions / patients_considered if patients_considered > 0 else 0
+
+        case_results[case_name] = {
+            'remission_rate': remission_rate,
+            'recovery_rate': recovery_rate,
+            'patients_considered': patients_considered
+        }
+
+    # Print the results for each case
+    for case_name, results in case_results.items():
+        print(f"Case '{case_name}':")
+        print(f"  Patients considered: {results['patients_considered']}")
+        print(f"  Remission Rate: {results['remission_rate']:.2f}")
+        print(f"  Recovery Rate: {results['recovery_rate']:.2f}\n")
+

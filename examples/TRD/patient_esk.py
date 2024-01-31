@@ -18,7 +18,7 @@ class PatientEsk(Agent):
             "ap": lambda: ('esketamine', 'movement'),
             "esketamine": lambda: ('ect', 'movement'),
             "ect": lambda: ('ad', 'movement'),
-            "remission": lambda: ('stay', 'stay'),
+            "remission": lambda: ('recovery', 'stay'),
             "relapse": lambda: ('intake', 'movement')
         }
 

@@ -1,7 +1,7 @@
 from core import Environment, Factory
 from examples.TRD.patient import Patient
 from examples.TRD.patient_esk import PatientEsk
-from utilities import Capacity
+from utilities import Capacity, generate_networkx_graph
 
 
 def run_simulation(simulation_id, config, cap_dist, simulation_duration):
@@ -42,6 +42,9 @@ def run_simulation(simulation_id, config, cap_dist, simulation_duration):
         factory = Factory(config=config['agent_config'], agent_class_type=Patient)
 
     env.connect_factory(factory)
+    
+    # if simulation_id == 0:
+    #     generate_networkx_graph(env)        
 
     # setup initial patients
     for agent, count in config['initial_agents'].items():
@@ -49,6 +52,8 @@ def run_simulation(simulation_id, config, cap_dist, simulation_duration):
 
     env.set_patient_rate(config['patient_rate'])
     env.run(until=simulation_duration, verbose=False)
+
+    # env.plot_occupancies(["relapse"])
 
     from core import SimulationInstance
     instance = SimulationInstance(run_id=simulation_id, agents=env.agents,run_data=env.data)

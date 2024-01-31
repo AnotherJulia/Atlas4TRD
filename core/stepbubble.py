@@ -9,7 +9,6 @@ class StepBubble(Bubble):
         self.capacity = capacity
         self.waiting_queue = []
 
-
         # Treatment specific parameters (non-changing)
         self.treatment_config = treatment_config
         self.treatment_parameters = read_config(treatment_config)
@@ -42,7 +41,7 @@ class StepBubble(Bubble):
             agent.add_to_medical_history(event_type="treatment_enter", time=self.environment.time, event_data=event_data)
 
             # Schedule a TreatmentEvent
-            event_time = self.environment.time + self.duration
+            event_time = self.environment.time
             treatment_event = TreatmentEvent(event_time, agent, self)
             self.environment.schedule_event(treatment_event)
         else:
