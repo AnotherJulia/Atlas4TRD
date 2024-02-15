@@ -54,8 +54,9 @@ class StepBubble(Bubble):
             self.waiting_queue.append(agent)
 
     def check_available_spots(self):
-        if len(self.current_agents) < self.capacity and len(self.waiting_queue) != 0:
-            # let's allow the next agent from the waiting list into the bubble!
+        # Continue checking for available spots and agents in the waiting queue
+        while len(self.current_agents) < self.capacity and self.waiting_queue:
+            # Let the next agent from the waiting list into the bubble
             next_agent = self.waiting_queue.pop(0)
             self.add_agent(next_agent)
 

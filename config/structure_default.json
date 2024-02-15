@@ -7,7 +7,6 @@
     {"slug": "recovery", "description": "Patients relapsing from the remission bubble", "depth": 3, "connections": ["relapse"]},
     {"slug": "relapse", "description": "Patients relapsing from the remission bubble", "depth": 0, "connections": ["intake"]}
   ],
-
   "steps": [
     {"slug": "ad", "description": "AD Treatment, 4wks", "capacity_ratio": 0.4, "config": "config/ad_config.json", "depth": 1, "connections": ["remission", "ect"]},
     {"slug": "ap", "description": "AP treatment, 4wks", "capacity_ratio": 0.3, "config": "config/ap_config.json", "depth": 1, "connections": ["remission", "ect"]},
@@ -18,7 +17,7 @@
     "intake": 1156
   },
   "patient_rate": 1,
-  "simulation_duration": 750,
+  "simulation_duration": 1500,
   "agent_config": "config/agent_params.json",
   "event_dict_slug": {}
 }

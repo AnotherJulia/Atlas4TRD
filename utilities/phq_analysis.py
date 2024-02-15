@@ -3,6 +3,7 @@ import matplotlib.pyplot as plt
 from scipy.stats import norm
 from scipy.interpolate import interp1d
 from scipy.optimize import curve_fit
+from scipy.interpolate import PchipInterpolator
 
 from functools import lru_cache
 
@@ -179,21 +180,34 @@ class PHQ9Analysis:
             return self.interval_probs_discontinued
         else:
             raise ValueError(f"Don't have that group_type: {group_type}")
+    
+    @staticmethod
+    def smooth_negative_values(values, alpha=0.3):
+        smoothed_values = np.zeros_like(values)
+        smoothed_values[0] = values[0]  # Initialize with the first value for simplicity
+        for t in range(1, len(values)):
+            smoothed_values[t] = alpha * values[t] + (1 - alpha) * smoothed_values[t-1]
+        return smoothed_values
 
     def interpolate_probability_intervals(self, interval):
         # ensure timepoints and interval_probs are of same length
         assert len(interval) == len(self.sorted_time_values)
 
         # Create interpolation function using scipy interp1d
-        interpolation_function = interp1d(list(self.sorted_time_values), interval, kind='cubic',
-                                          fill_value="interpolate")
+        # interpolation_function = interp1d(list(self.sorted_time_values), interval, kind='cubic',
+                                          # fill_value="interpolate")
+
+        # Use PCHIP for monotonic interpolation
+        interpolation_function = PchipInterpolator(list(self.sorted_time_values), interval)
 
         new_time_points = np.arange(0, 52+1, 1)  # Creating new set of time points from 1 to 52*4.34 (inclusive)
 
         # Get interpolated values for new set of timepoints
         interpolated_values = interpolation_function(new_time_points)
 
-        # Normalize interpolated_values so they sum to 1
+        interpolated_values = self.smooth_negative_values(interpolated_values)
+
+        # Normali       ze interpolated_values so they sum to 1
         interpolated_values /= interpolated_values.sum()
 
         return interpolated_values
@@ -254,7 +268,7 @@ class PHQ9Analysis:
         return relapse_time
 
 
-    def plot_interpolated_probability_intervals(self, interval):
+    def plot_interpolated_probability_intervals(self, interval, group="maintenance"):
         # Get the interpolated probabilities
         interpolated_probabilities = self.interpolate_probability_intervals(interval)
 
@@ -262,11 +276,48 @@ class PHQ9Analysis:
         new_time_points = np.arange(0, 52+1, 1)
 
         # Create the plot
-        plt.figure(figsize=(10, 6))
-        plt.plot(new_time_points, interpolated_probabilities, label='Maintenance Group')
-        plt.title('b')
-        plt.xlabel('Time (weeks)')
-        plt.ylabel('Probability')
+        plt.figure(figsize=(6, 4.5))
+        plt.plot(new_time_points, interpolated_probabilities, label=group)
+
+        plt.ylim(0, 0.17)
+
+        plt.xlabel('Time in weeks')
+        plt.ylabel('Relapse probability')
         plt.grid(True)
+
+        plt.savefig(f'results/fig_relase_{group}.png', dpi=300, bbox_inches='tight')
+
+        plt.show()
+
+    def plot_combined_interpolated_probabilities(self, maintenance_intervals, discontinued_intervals):
+        # Get the interpolated probabilities for both groups
+        maintenance_probabilities = self.interpolate_probability_intervals(maintenance_intervals)
+        discontinued_probabilities = self.interpolate_probability_intervals(discontinued_intervals)
+
+        # Create a new set of time points in weeks
+        new_time_points = np.arange(0, 52 + 1, 1)
+
+        # Create the plot
+        plt.figure(figsize=(6, 4.5))
+
+        # Plot for maintenance group
+        plt.plot(new_time_points, maintenance_probabilities, 'ro-', label="Maintenance", marker='o', color='red', markevery=0.1)
+
+        # Plot for discontinued group
+        plt.plot(new_time_points, discontinued_probabilities, 'bs-', label="Discontinued", marker='s', color='blue', markevery=0.1)
+
+        # Set the y-axis limit
+        plt.ylim(0, 0.17)
+
+        # Adding labels, legend, and grid
+        plt.xlabel('Time in weeks')
+        plt.ylabel('Relapse probability')
+        plt.legend()
+        plt.grid(True)
+
+        # Save the plot
+        plt.savefig('results/fig_relapse_combined.png', dpi=300, bbox_inches='tight')
+
+        # Display the plot
         plt.show()
 

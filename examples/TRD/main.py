@@ -20,7 +20,8 @@ def run_simulation_w_config(name, config_path, esketamine_fraction):
     simulation_instances = []
 
     config = load_simulation_config(config_path)
-    simulation_duration = config["simulation_duration"]
+    # simulation_duration = config["simulation_duration"]
+    simulation_duration = 750
 
     config_path_cap = "config/capacities.json"
     config_cap = load_simulation_config(config_path_cap)
@@ -42,18 +43,16 @@ def run_simulation_w_config(name, config_path, esketamine_fraction):
 if __name__ == "__main__":
     sim_instances = {}
 
-    # sim_instances["esketamine @ 10%"] = run_simulation_w_config(name="esketamine @ 10%",
-    #         config_path="config/structure_esketamine.json", esketamine_fraction=0.1)
-    sim_instances["esketamine @ 20%"] = run_simulation_w_config(name="esketamine @ 20%",
+    sim_instances["10% of capacity Esketamine"] = run_simulation_w_config(name="10% of capacity Esketamine",
+            config_path="config/structure_esketamine.json", esketamine_fraction=0.1)
+    sim_instances["20% of capacity Esketamine"] = run_simulation_w_config(name="20% of capacity Esketamine",
             config_path="config/structure_esketamine.json", esketamine_fraction=0.2)
-    # sim_instances["esketamine @ 40%"] = run_simulation_w_config(name="esketamine @ 40%",
-    #         config_path="config/structure_esketamine.json", esketamine_fraction=0.4)
-    # sim_instances["no esketamine"] = run_simulation_w_config(name="no esketamine",
-    #         config_path="config/structure_default.json", esketamine_fraction=0.0)
-    
+    sim_instances["40% of capacity Esketamine"] = run_simulation_w_config(name="40% of capacity Esketamine",
+            config_path="config/structure_esketamine.json", esketamine_fraction=0.4)
+    sim_instances["Without Esketamine"] = run_simulation_w_config(name="Without Esketamine",
+            config_path="config/structure_default.json", esketamine_fraction=0.0)
 
-    # instance = sim_instances["esketamine @ 20%"][0]
-    # agents = instance.agents
-    # print(agents[500].medical_history)
+    # sim_instances["w/ maintenance"] = run_simulation_w_config(name="maintenance", 
+    #         config_path="config/structure_maintenance.json", esketamine_fraction=0.2)
 
     analyse_instances(sim_instances)

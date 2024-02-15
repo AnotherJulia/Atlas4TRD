@@ -1,13 +1,13 @@
 {
   "name": "Esketamine",
   "total_capacity": 50,
- "states": [
+  "states": [
     {"slug": "intake", "description": "Patients coming into the TRD care pathway", "depth": 0, "connections": ["ad", "ap", "ad_ap"]},
-    {"slug": "remission", "description": "Patients coming out of the pathway", "depth": 4, "connections": ["recovery", "relapse"]},
+    {"slug": "remission", "description": "Patients coming out of the pathway", "depth": 4, "connections": ["recovery", "relapse", "maintenance"]},
     {"slug": "recovery", "description": "Patients relapsing from the remission bubble", "depth": 4, "connections": ["relapse"]},
-    {"slug": "relapse", "description": "Patients relapsing from the remission bubble", "depth": 0, "connections": ["intake"]}
+    {"slug": "relapse", "description": "Patients relapsing from the remission bubble", "depth": 0, "connections": ["intake"]},
+    {"slug": "maintenance", "description": "Patients staying on their medication", "depth": 0, "connections":["relapse"]}
   ],
-
   "steps": [
     {"slug": "ad", "description": "AD Treatment, 4wks", "capacity_ratio": 0.3, "config": "config/ad_config.json", "depth": 1, "connections": ["remission", "esketamine"]},
     {"slug": "ap", "description": "AP treatment, 4wks", "capacity_ratio": 0.3, "config": "config/ap_config.json", "depth": 1, "connections": ["remission", "esketamine"]},

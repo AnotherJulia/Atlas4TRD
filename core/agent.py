@@ -9,7 +9,13 @@ class Agent:
         self.current_bubble = initial_bubble
         self.event_slug_dict = {}
 
+        self.num_treatments_tried = 0
+        self.num_relapses = 0
+
         self.medical_history = []
+
+        self.total_waiting_time = 0  # Initialize total waiting time
+        self.start_time = environment.time
 
     def __str__(self):
         return f'{self.id} @ {self.current_bubble}'
@@ -26,6 +32,19 @@ class Agent:
             "time": time
         }
         self.medical_history.append(event_with_id)
+
+        if event_type == "treatment_enter":
+            self.num_treatments_tried += 1
+            # Check for the most recent 'waiting' event before this 'treatment_enter' event
+            waiting_events = [event for event in self.medical_history if event['type'] == 'waiting']
+            if waiting_events:
+                last_waiting_event = waiting_events[-1]
+                waiting_time = time - last_waiting_event['time']
+                self.total_waiting_time += waiting_time
+
+        if event_type == "relapse":
+            self.num_relapses += 1
+
 
     def decide_and_schedule_next_event(self, event_time=None):
 
