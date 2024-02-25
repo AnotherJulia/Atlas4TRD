@@ -1,11 +1,12 @@
 
 class SimulationInstance:
 
-    def __init__(self, run_id, agents, run_data=None):
+    def __init__(self, run_id, agents, environment, run_data=None):
         self.id = run_id
         self.agents = agents
         self.run_data = run_data
-
+        self.environment = environment
+        
         self.patient_profiles = self.create_patient_profiles()
         self.patient_logs = self.process_patient_logs()
         # self.patient_journeys = {}

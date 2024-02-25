@@ -1,6 +1,7 @@
 {
    "duration": 4,
-   "cost": 6000,
+   "treatment_cost": 950,
+   "maintenance_cost": 50,
    "response_rate": 0.507,
    "remission_rate": 0.2978,
    "relapse_rate": 0.125,

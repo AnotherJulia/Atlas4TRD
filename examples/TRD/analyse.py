@@ -35,31 +35,33 @@ markers_cases = {
 markevery = 0.1
 
 def analyse_instances(simulation_instances):
-    stabilization_time=400
+    stabilization_time=300
+    cutoff_time=500
 
     print("----------------------")
-    # calculate_employment_rate_by_case(simulation_instances)
-    # calculate_time_in_system(simulation_instances, cr=800)
-    # calculate_cost_effectiveness(simulation_instances)
-    # calculate_transition_rates_post_stabilization(simulation_instances, stabilization_time)
+    # calculate_employment_rate_by_case(simulation_instances)                                      
+    # calculate_time_in_system(simulation_instances, stabilization_time)
+    # calculate_cost_effectiveness(simulation_instances, stabilization_time, cutoff_time)
+    # calculate_costs(simulation_instances, stabilization_time)
+    calculate_transition_rates_post_stabilization(simulation_instances, stabilization_time)
     # calculate_patient_durations(simulation_instances, stabilization_time)
-    # calculate_average_treatments(simulation_instances)
-    # calculate_average_relapses(simulation_instances)
+    calculate_average_treatments(simulation_instances)
+    calculate_average_relapses(simulation_instances)
 
-    # # Call the function with your simulation_instances data
-    # calculate_average_waiting_times_post_stabilization(simulation_instances, stabilization_time)
-    # print("----------------------")
+    # Call the function with your simulation_instances data
+    calculate_average_waiting_times_post_stabilization(simulation_instances, stabilization_time)
+    print("----------------------")
 
-    analyse_aspect(simulation_instances, aspect='remission', title="Average number of patients in remission")
+    # analyse_aspect(simulation_instances, aspect='remission', title="Average number of patients in remission")
     analyse_aspect_percentages(simulation_instances, 'remission')
 
-    analyse_aspect(simulation_instances, aspect='recovery', title="Average number of patients in recovery")
+    # analyse_aspect(simulation_instances, aspect='recovery', title="Average number of patients in recovery")
     analyse_aspect_percentages(simulation_instances, 'recovery')
 
     analyse_waiting_list(simulation_instances)
 
     plot_total_waiting_list_size(simulation_instances)
-    # plot_waiting_list_proportions(simulation_instances)
+    plot_waiting_list_proportions(simulation_instances)
     analyse_waiting_list_proportions(simulation_instances)
 
 
@@ -71,7 +73,7 @@ def plot_data(time, data, title):
 
     plt.xlabel("Time in weeks")
     plt.ylabel("Number of patients")
-    # plt.title(title)
+    plt.title(title)
     plt.legend()
     plt.show()
 
@@ -125,7 +127,7 @@ def analyse_aspect(simulation_instances, aspect, title, confidence_level=0.95, l
     plt.xlim(0, 750)
     plt.ylim(0, ylim)
 
-    # plt.title(title)
+    plt.title(title)
     plt.savefig(f'results/fig_{aspect}.png', dpi=300, bbox_inches='tight')
 
     plt.legend()
@@ -198,7 +200,7 @@ def analyse_aspect_percentages(simulation_instances, aspect, confidence_level=0.
     
     ylim = 1
     if aspect == "remission":
-        ylim = 0.1
+        ylim = 1
     elif aspect == "recovery":
         ylim = 1
 
@@ -206,7 +208,7 @@ def analyse_aspect_percentages(simulation_instances, aspect, confidence_level=0.
 
     plt.xlabel('Time in Weeks')
     plt.ylabel(f'Proportion of patients')
-    # plt.title(f'{aspect.capitalize()} Rates Over Time with CI')
+    plt.title(f'{aspect.capitalize()} Rates Over Time with CI')
     plt.legend()
     plt.grid(True)
 
@@ -245,9 +247,8 @@ def analyse_waiting_list(simulation_instances):
                 avg_sizes = np.mean(sizes, axis=0)
                 plt.plot(time_axis, avg_sizes, label=bubble, color=colors_treatments[bubble], marker=markers_treatments[bubble], markevery=markevery)
 
-        # plt.title(f'Average Waiting List Size Over Time - {case}')
+        plt.title(f'Average Waiting List Size Over Time - {case}')
        
-
         plt.xlim(0, 750)
         plt.ylim(0, 1300)
 
@@ -299,7 +300,8 @@ def plot_total_waiting_list_size(simulation_instances):
 
     plt.xlabel("Time in weeks")
     plt.ylabel("Number of patients")
-
+    
+    plt.title("Total Waiting List Size")
     plt.xlim(0, 750)
     plt.ylim(0, 1400)
 
@@ -359,7 +361,7 @@ def analyse_waiting_list_proportions(simulation_instances):
     plt.xlim(0, 750)
     plt.ylim(0, 1)
 
-    # plt.title("Proportion of People on Waiting List Over Time")
+    plt.title("Proportion of People on Waiting List Over Time")
     plt.legend()
     plt.grid(True)
 
@@ -412,7 +414,7 @@ def plot_waiting_list_proportions(simulation_instances):
 
     plt.xlabel("Time in weeks")
     plt.ylabel("Proportion of patients")
-    # plt.title("Proportion of People on Waiting List Over Time")
+    plt.title("Proportion of People on Waiting List Over Time")
     plt.legend()
     plt.grid(True)
     plt.xlim(0, 750)
@@ -469,13 +471,232 @@ def calculate_time_in_system(simulation_instances, cr=500):
     average_time_in_system = np.mean(total_times) if total_times else 0  # Avoid division by zero if total_times is empty
     print(f"Average time in system from t={cr} with recovery cutoff (wk): {average_time_in_system}")
 
-
 # def calculate_cost_effectiveness(simulation_instances):
-#     QOL_REMISSION = 0.901
-#     QOL_RESPONSE = 0.673
-#     QOL_NO_RESPONSE = 0.417
-#     TRT = {'ad', "ap", "ad_ap", "esketamine", "ect"}
-#     pass
+#     QOL_WEIGHT_REMISSION = 0.901
+#     QOL_WEIGHT_RESPONSE = 0.673
+#     QOL_WEIGHT_NO_RESPONSE = 0.417
+
+#     mean_qols = {}
+
+#     for case, instances in simulation_instances.items():
+#         case_qols = []
+
+#         for instance in instances:
+#             agent_qols = []
+
+#             for agent in instance.agents:
+#                 # Calculate QOL for each agent using the time spent in each state
+#                 agent_qol = (agent.time_remission * QOL_WEIGHT_REMISSION / 52 +
+#                              agent.time_response * QOL_WEIGHT_RESPONSE / 52 +
+#                              agent.time_no_response * QOL_WEIGHT_NO_RESPONSE / 52)
+
+#                 agent_qols.append(agent_qol)
+
+#             # Calculate the average QOL for the case
+#             average_qols_for_case = np.mean(agent_qols) if agent_qols else 0
+#             case_qols.append(average_qols_for_case)
+
+#         # Calculate the mean QOL across all instances for the case
+#         mean_case_qols = np.mean(case_qols) if case_qols else 0
+#         mean_qols[case] = mean_case_qols
+#     
+#     print(mean_qols)
+
+#     return mean_qols
+
+# def calculate_cost_effectiveness(simulation_instances, stabilization_point=0):
+#     QOL_WEIGHT_REMISSION = 0.901
+#     QOL_WEIGHT_RESPONSE = 0.673
+#     QOL_WEIGHT_NO_RESPONSE = 0.417
+
+#     mean_qalys = {}
+
+#     for case, instances in simulation_instances.items():
+#         case_qalys = []
+
+#         print(f"Case: {case}")
+
+#         i=0
+#         for instance in instances:
+#             print(f"Instance: {i}")
+#             i+=1
+#             agent_qalys = []
+
+#             for agent in instance.agents:
+#                 # Skip agents that started before the stabilization point
+#                 if agent.start_time < stabilization_point:
+#                     continue
+
+#                 # Calculates total time in the model for the agent
+#                 total_time_in_model = instance.environment.time - agent.start_time
+
+#                 # Calculate QALYs for each agent
+#                 agent_qalys_value = (QOL_WEIGHT_REMISSION * ((agent.time_remission + agent.time_response) / 52) +
+#                                      QOL_WEIGHT_RESPONSE * (agent.time_response / 52) +
+#                                      QOL_WEIGHT_NO_RESPONSE * ((total_time_in_model - agent.time_remission - agent.time_response) / 52))
+
+#                 # print(agent_qalys_value)
+#                 agent_qalys.append(agent_qalys_value)
+#             
+#             # print(agent_qalys)
+#             # Calculate the average QALYs for the case
+#             average_qalys_for_case = np.mean(agent_qalys) if agent_qalys else 0
+#             print(average_qalys_for_case)
+#             case_qalys.append(average_qalys_for_case)
+
+#         # Calculate the mean QALYs across all instances for the case
+#         mean_case_qalys = np.mean(case_qalys) if case_qalys else 0
+#         mean_qalys[case] = mean_case_qalys
+#     
+#     print(f"Mean Qalys: {mean_qalys}")
+#     return mean_qalys
+
+def calculate_cost_effectiveness(simulation_instances, stabilization_point=300, cutoff_time=400):
+    QOL_WEIGHT_REMISSION = 0.901
+    QOL_WEIGHT_RESPONSE = 0.673
+    QOL_WEIGHT_NO_RESPONSE = 0.417
+
+    mean_qalys = {}
+
+    for case, instances in simulation_instances.items():
+        case_qalys = []
+
+        print(f"\nCase: {case}")
+
+        instance_counter = 0
+        for instance in instances:
+            print(f"\n  Instance: {instance_counter}")
+            instance_counter += 1
+            agent_qalys = []
+
+            agent_counter = 0
+            for agent in instance.agents:
+                
+                agent_counter += 1
+
+                if agent.start_time < stabilization_point or agent.start_time > cutoff_time:
+                    # print("      Skipped due to start time before stabilization")
+                    continue
+                
+                print(f"    Agent: {agent_counter}")
+
+                total_time_in_model = instance.environment.time - agent.start_time
+                print(f"      Total time in model: {total_time_in_model}")
+
+                agent_qalys_value = (QOL_WEIGHT_REMISSION * ((agent.time_remission + agent.time_response) / 52) +
+                                     QOL_WEIGHT_RESPONSE * (agent.time_response / 52) +
+                                     QOL_WEIGHT_NO_RESPONSE * ((total_time_in_model - agent.time_remission - agent.time_response) / 52))
+                
+                print(f"      Agent QALYs: {agent_qalys_value}")
+                agent_qalys.append(agent_qalys_value)
+
+            if agent_qalys:
+                average_qalys_for_case = np.mean(agent_qalys)
+                print(f"    Average QALYs for this instance: {average_qalys_for_case}")
+            else:
+                average_qalys_for_case = 0
+                print("    No agents processed for this instance.")
+
+            case_qalys.append(average_qalys_for_case)
+
+        if case_qalys:
+            mean_case_qalys = np.mean(case_qalys)
+        else:
+            mean_case_qalys = 0
+
+        mean_qalys[case] = mean_case_qalys
+        print(f"  Mean QALYs for case '{case}': {mean_case_qalys}")
+
+    print(f"\nOverall Mean QALYs: {mean_qalys}")
+    return mean_qalys
+
+
+def calculate_costs(simulation_instances, stabilization_point=300):
+    treatment_costs = {}  # This will store the average treatment costs for each case
+    indirect_costs = {}
+
+    for case, instances in simulation_instances.items():
+        instance_direct_costs = []  # To store the average cost for each instance within a case
+        instance_indirect_costs = []
+        
+        for instance in instances:
+            agent_direct_costs = []  # To store the cost for each agent within an instance
+            agent_indirect_costs = []
+
+            for agent in instance.agents:
+                # Skip agents that started before the stabilization point
+                if agent.start_time < stabilization_point:
+                    continue
+
+                time_in_system = instance.environment.time - agent.start_time
+                indirect_cost = ((time_in_system - agent.time_remission) * 0.54 + agent.time_remission * 0.23) * 1214
+                agent_indirect_costs.append(indirect_cost)
+
+                agent_total_direct_cost = 0  # Initialize the total cost for this agent
+
+                for i, event in enumerate(agent.medical_history):
+                    
+                    if event['type'] == 'treatment_enter':
+                        treatment_details = get_treatment_details(instance, event['data']['treatment'])
+                        agent_total_direct_cost += treatment_details['treatment_cost']
+
+                    if event['data'].get('state') == 'remission':
+                        # Get the treatment details
+                        treatment_details = get_treatment_details(instance, event['data']['treatment'])
+
+                        # Determine the duration of the remission state
+                        if i + 1 < len(agent.medical_history):
+                            # If there is a subsequent event, calculate the duration up to that event
+                            next_event = agent.medical_history[i + 1]
+                            remission_duration = next_event['time'] - event['time']
+                        else:
+                            # If there is no subsequent event, use the current environment time
+                            remission_duration = 24                     
+
+                        # Calculate the maintenance cost based on the remission duration
+                        maintenance_cost = calculate_maintenance_cost(remission_duration, treatment_details['maintenance_cost'])
+                        agent_total_direct_cost += maintenance_cost
+
+                agent_direct_costs.append(agent_total_direct_cost)  # Add the agent's total cost to the list for this instance
+
+            # Calculate the average cost for this instance and add it to the list for the case
+            instance_average_cost = np.mean(agent_direct_costs) if agent_direct_costs else 0
+            instance_direct_costs.append(instance_average_cost)
+
+            instance_average_indirect_cost = np.mean(agent_indirect_costs) if agent_indirect_costs else 0
+            instance_indirect_costs.append(instance_average_indirect_cost)
+
+        # Calculate the mean cost across all instances for the case
+        case_average_cost = np.mean(instance_direct_costs) if instance_direct_costs else 0
+        treatment_costs[case] = case_average_cost
+
+        case_average_indirect_costs = np.mean(instance_indirect_costs) if instance_indirect_costs else 0
+        indirect_costs[case] = case_average_indirect_costs
+
+    print(treatment_costs)
+    print(indirect_costs)
+
+    return treatment_costs
+
+def get_treatment_details(instance, treatment_name):
+    # Use a generator expression to find the treatment bubble by its slug
+    treatment_bubble = next((bubble for bubble in instance.environment.bubbles if bubble.slug == treatment_name), None)
+
+    if treatment_bubble:
+        # print(treatment_name)
+        
+        treatment_details = {
+            "treatment_cost": treatment_bubble.treatment_cost,
+            "maintenance_cost": treatment_bubble.maintenance_cost
+        }
+
+        return treatment_details
+    else:
+        raise ValueError(f"Cannot find '{treatment_name}' in bubbles")
+
+def calculate_maintenance_cost(duration, maintenance_costs):
+    return duration * maintenance_costs
+
 def calculate_transition_rates(simulation_instances):
     remission_transitions = 0
     recovery_transitions = 0

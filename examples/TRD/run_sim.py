@@ -56,5 +56,5 @@ def run_simulation(simulation_id, config, cap_dist, simulation_duration):
     # env.plot_occupancies(["relapse"])
 
     from core import SimulationInstance
-    instance = SimulationInstance(run_id=simulation_id, agents=env.agents,run_data=env.data)
+    instance = SimulationInstance(run_id=simulation_id, agents=env.agents,run_data=env.data, environment=env)
     return instance

@@ -13,7 +13,11 @@ class StepBubble(Bubble):
         self.treatment_config = treatment_config
         self.treatment_parameters = read_config(treatment_config)
         self.duration = self.treatment_parameters['duration']
-        self.cost = self.treatment_parameters['cost']
+        # self.cost = self.treatment_parameters['cost']
+
+        self.treatment_cost = self.treatment_parameters["treatment_cost"]
+        self.maintenance_cost = self.treatment_parameters["maintenance_cost"]
+
         self.response_rate = self.treatment_parameters['response_rate']
         self.remission_rate = self.treatment_parameters['remission_rate']
         self.relapse_rate = self.treatment_parameters['relapse_rate']
@@ -37,6 +41,8 @@ class StepBubble(Bubble):
             self.current_agents.append(agent)
             event_data = {
                 "treatment": self.slug,
+                "duration": self.duration,
+                "state": "no_response"
             }
             agent.add_to_medical_history(event_type="treatment_enter", time=self.environment.time, event_data=event_data)
 

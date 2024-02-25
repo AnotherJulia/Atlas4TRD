@@ -34,7 +34,8 @@ class MovementEvent(Event):
 
                 event_data = {
                     "start_bubble": self.start_bubble.slug,
-                    "end_bubble": self.end_bubble.slug
+                    "end_bubble": self.end_bubble.slug,
+                    "state": "no_response"
                 }
 
                 self.agent.add_to_medical_history(event_type="movement_event", event_data=event_data, time=self.time)
@@ -42,11 +43,11 @@ class MovementEvent(Event):
 
             elif self.end_bubble.slug == "remission":
 
-                if self.agent.num_relapses >= 5:  # Assuming 2 relapses trigger maintenance instead of recovery
+                if self.agent.num_relapses >= 2:  # Assuming 2 relapses trigger maintenance instead of recovery
                     # The agent stays in remission on maintenance medication
                     # You might want to add a new event or log to indicate maintenance treatment
                     # For example:
-                    self.agent.add_to_medical_history(event_type="maintenance", event_data={"treatment": "continued"}, time=self.time)
+                    # self.agent.add_to_medical_history(event_type="maintenance", event_data={"treatment": "continued", "state": "remission"}, time=self.time)
                     return 
 
                 precomputed_probs = [self.end_bubble.phq_analyzer.get_prob_at_time(t, p=self.start_bubble.relapse_rate, type="maintenance") for t in range(0, 25)]
@@ -57,6 +58,7 @@ class MovementEvent(Event):
                     if random.random() < prob:
                         relapse = next(bubble for bubble in environment.bubbles if bubble.slug == "relapse")
                         movement_event = MovementEvent(self.time + t, self.agent, self.end_bubble, relapse)
+                        self.agent.add_to_medical_history(event_type="relapse", event_data={"state": "no_response"}, time=self.time)
                         environment.schedule_event(movement_event)
                         return
 
@@ -89,6 +91,7 @@ class MovementEvent(Event):
                     if random.random() < prob:
                         relapse = next(bubble for bubble in environment.bubbles if bubble.slug == "relapse")
                         movement_event = MovementEvent(self.time + t, self.agent, self.end_bubble, relapse)
+                        self.agent.add_to_medical_history(event_type="relapse", event_data={"state": "no_response"}, time=self.time)
                         environment.schedule_event(movement_event)
                         break
 
@@ -109,7 +112,8 @@ class MovementEvent(Event):
 
                 event_data = {
                     "start_bubble": self.start_bubble.slug,
-                    "end_bubble": self.end_bubble.slug
+                    "end_bubble": self.end_bubble.slug,
+                    "state": "no_response"
                 }
 
                 self.agent.add_to_medical_history(event_type="relapse", event_data=event_data, time=self.time)

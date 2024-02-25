@@ -12,6 +12,10 @@ class Agent:
         self.num_treatments_tried = 0
         self.num_relapses = 0
 
+        self.time_remission = 0
+        self.time_response = 0
+        self.time_no_response = 0
+
         self.medical_history = []
 
         self.total_waiting_time = 0  # Initialize total waiting time
@@ -24,6 +28,27 @@ class Agent:
     #     self.current_bubble = bubble
     #     bubble.add_agent(agent=self)
 
+    # def add_to_medical_history(self, event_type, event_data, time):
+    #     event_with_id = {
+    #         "patient_id": self.id,
+    #         "type": event_type,
+    #         "data": event_data,
+    #         "time": time
+    #     }
+    #     self.medical_history.append(event_with_id)
+
+    #     if event_type == "treatment_enter":
+    #         self.num_treatments_tried += 1
+    #         # Check for the most recent 'waiting' event before this 'treatment_enter' event
+    #         waiting_events = [event for event in self.medical_history if event['type'] == 'waiting']
+    #         if waiting_events:
+    #             last_waiting_event = waiting_events[-1]
+    #             waiting_time = time - last_waiting_event['time']
+    #             self.total_waiting_time += waiting_time
+
+    #     if event_type == "relapse":
+    #         self.num_relapses += 1
+
     def add_to_medical_history(self, event_type, event_data, time):
         event_with_id = {
             "patient_id": self.id,
@@ -33,14 +58,23 @@ class Agent:
         }
         self.medical_history.append(event_with_id)
 
+        # Calculate the duration of the current state before adding the new event
+        if self.medical_history and len(self.medical_history) > 1:
+            last_event = self.medical_history[-2]  # Second last event, since the latest one is just added
+            duration = time - last_event['time']
+
+            # Check the state of the last event and update the corresponding time attribute
+            if 'state' in last_event['data']:
+                last_state = last_event['data']['state']
+                if last_state == 'remission':
+                    self.time_remission += duration
+                elif last_state == 'response':
+                    self.time_response += duration
+
+        # Handle specific event types as before
         if event_type == "treatment_enter":
             self.num_treatments_tried += 1
-            # Check for the most recent 'waiting' event before this 'treatment_enter' event
-            waiting_events = [event for event in self.medical_history if event['type'] == 'waiting']
-            if waiting_events:
-                last_waiting_event = waiting_events[-1]
-                waiting_time = time - last_waiting_event['time']
-                self.total_waiting_time += waiting_time
+            # Handle waiting time as before
 
         if event_type == "relapse":
             self.num_relapses += 1
